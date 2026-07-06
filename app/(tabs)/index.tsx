@@ -81,7 +81,15 @@ type HorseRidingDetails = {
   hoofOilUsed?: boolean;
 
   releveAmount?: string;
+  releveBuyingDate?: string;
+
   equiJewelAmount?: string;
+  equiJewelBuyingDate?: string;
+
+  foodOilBuyingDate?: string;
+  shampooBuyingDate?: string;
+  padsCleaningSuppliesBuyingDate?: string;
+  hoofOilBuyingDate?: string;
 
   dressageTestDay?: boolean;
   dressageTestName?: string;
@@ -187,7 +195,15 @@ export default function HomeScreen() {
   const [horseHoofOilUsed, setHorseHoofOilUsed] = useState(false);
 
   const [horseReleveAmount, setHorseReleveAmount] = useState('');
+  const [horseReleveBuyingDate, setHorseReleveBuyingDate] = useState('');
+
   const [horseEquiJewelAmount, setHorseEquiJewelAmount] = useState('');
+  const [horseEquiJewelBuyingDate, setHorseEquiJewelBuyingDate] = useState('');
+
+  const [horseFoodOilBuyingDate, setHorseFoodOilBuyingDate] = useState('');
+  const [horseShampooBuyingDate, setHorseShampooBuyingDate] = useState('');
+  const [horsePadsCleaningSuppliesBuyingDate, setHorsePadsCleaningSuppliesBuyingDate] = useState('');
+  const [horseHoofOilBuyingDate, setHorseHoofOilBuyingDate] = useState('');
 
   const [horseDressageTestDay, setHorseDressageTestDay] = useState(false);
   const [horseDressageTestName, setHorseDressageTestName] = useState('');
@@ -323,7 +339,15 @@ export default function HomeScreen() {
     setHorseHoofOilUsed(false);
 
     setHorseReleveAmount('');
+    setHorseReleveBuyingDate('');
+
     setHorseEquiJewelAmount('');
+    setHorseEquiJewelBuyingDate('');
+
+    setHorseFoodOilBuyingDate('');
+    setHorseShampooBuyingDate('');
+    setHorsePadsCleaningSuppliesBuyingDate('');
+    setHorseHoofOilBuyingDate('');
 
     setHorseDressageTestDay(false);
     setHorseDressageTestName('');
@@ -889,7 +913,15 @@ export default function HomeScreen() {
           hoofOilUsed: horseHoofOilUsed,
 
           releveAmount: horseReleveAmount.trim(),
+          releveBuyingDate: horseReleveBuyingDate.trim(),
+
           equiJewelAmount: horseEquiJewelAmount.trim(),
+          equiJewelBuyingDate: horseEquiJewelBuyingDate.trim(),
+
+          foodOilBuyingDate: horseFoodOilBuyingDate.trim(),
+          shampooBuyingDate: horseShampooBuyingDate.trim(),
+          padsCleaningSuppliesBuyingDate: horsePadsCleaningSuppliesBuyingDate.trim(),
+          hoofOilBuyingDate: horseHoofOilBuyingDate.trim(),
 
           dressageTestDay: horseDressageTestDay,
           dressageTestName: horseDressageTestName.trim(),
@@ -1490,15 +1522,50 @@ export default function HomeScreen() {
 
         {renderYesNoButton('Hay Given', horseHayGiven, () => setHorseHayGiven(!horseHayGiven))}
         {renderYesNoButton('Water Checked', horseWaterChecked, () => setHorseWaterChecked(!horseWaterChecked))}
+
         {renderYesNoButton('Food Oil Given', horseFoodOilGiven, () => setHorseFoodOilGiven(!horseFoodOilGiven))}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Food oil buying date, example: 06/07/2026"
+          placeholderTextColor="#888"
+          value={horseFoodOilBuyingDate}
+          onChangeText={setHorseFoodOilBuyingDate}
+        />
+
         {renderYesNoButton('Hoof Oil Used', horseHoofOilUsed, () => setHorseHoofOilUsed(!horseHoofOilUsed))}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Hoof oil buying date, example: 06/07/2026"
+          placeholderTextColor="#888"
+          value={horseHoofOilBuyingDate}
+          onChangeText={setHorseHoofOilBuyingDate}
+        />
 
         <Text style={styles.detailsSubtitle}>Cleaning Supplies</Text>
 
         {renderYesNoButton('Shampoo Used', horseShampooUsed, () => setHorseShampooUsed(!horseShampooUsed))}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Shampoo buying date, example: 06/07/2026"
+          placeholderTextColor="#888"
+          value={horseShampooBuyingDate}
+          onChangeText={setHorseShampooBuyingDate}
+        />
+
         {renderYesNoButton('Pads Cleaning Supplies Used', horsePadsCleaningSuppliesUsed, () =>
           setHorsePadsCleaningSuppliesUsed(!horsePadsCleaningSuppliesUsed)
         )}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Pads cleaning supplies buying date"
+          placeholderTextColor="#888"
+          value={horsePadsCleaningSuppliesBuyingDate}
+          onChangeText={setHorsePadsCleaningSuppliesBuyingDate}
+        />
 
         <Text style={styles.detailsSubtitle}>Monthly Feed</Text>
 
@@ -1512,10 +1579,26 @@ export default function HomeScreen() {
 
         <TextInput
           style={styles.input}
+          placeholder="Re-Leve buying date, example: 06/07/2026"
+          placeholderTextColor="#888"
+          value={horseReleveBuyingDate}
+          onChangeText={setHorseReleveBuyingDate}
+        />
+
+        <TextInput
+          style={styles.input}
           placeholder="Equi Jewel amount, example: 0.5 kg"
           placeholderTextColor="#888"
           value={horseEquiJewelAmount}
           onChangeText={setHorseEquiJewelAmount}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Equi Jewel buying date, example: 06/07/2026"
+          placeholderTextColor="#888"
+          value={horseEquiJewelBuyingDate}
+          onChangeText={setHorseEquiJewelBuyingDate}
         />
 
         <Text style={styles.detailsSubtitle}>Dressage Test</Text>
@@ -1753,12 +1836,24 @@ export default function HomeScreen() {
           <Text style={styles.savedDetailsText}>Hay: {horse.hayGiven ? 'Yes' : 'No'}</Text>
           <Text style={styles.savedDetailsText}>Water: {horse.waterChecked ? 'Yes' : 'No'}</Text>
           <Text style={styles.savedDetailsText}>Food Oil: {horse.foodOilGiven ? 'Yes' : 'No'}</Text>
+          <Text style={styles.savedDetailsText}>
+            Food Oil Bought: {horse.foodOilBuyingDate || 'Not filled'}
+          </Text>
           <Text style={styles.savedDetailsText}>Hoof Oil: {horse.hoofOilUsed ? 'Yes' : 'No'}</Text>
+          <Text style={styles.savedDetailsText}>
+            Hoof Oil Bought: {horse.hoofOilBuyingDate || 'Not filled'}
+          </Text>
 
           <Text style={styles.savedDetailsHeader}>Cleaning:</Text>
           <Text style={styles.savedDetailsText}>Shampoo: {horse.shampooUsed ? 'Yes' : 'No'}</Text>
           <Text style={styles.savedDetailsText}>
+            Shampoo Bought: {horse.shampooBuyingDate || 'Not filled'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
             Pads Cleaning Supplies: {horse.padsCleaningSuppliesUsed ? 'Yes' : 'No'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
+            Pads Supplies Bought: {horse.padsCleaningSuppliesBuyingDate || 'Not filled'}
           </Text>
 
           <Text style={styles.savedDetailsHeader}>Monthly Feed:</Text>
@@ -1766,7 +1861,13 @@ export default function HomeScreen() {
             Re-Leve: {horse.releveAmount || 'Not filled'}
           </Text>
           <Text style={styles.savedDetailsText}>
+            Re-Leve Bought: {horse.releveBuyingDate || 'Not filled'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
             Equi Jewel: {horse.equiJewelAmount || 'Not filled'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
+            Equi Jewel Bought: {horse.equiJewelBuyingDate || 'Not filled'}
           </Text>
 
           <Text style={styles.savedDetailsHeader}>Dressage:</Text>
