@@ -3,6 +3,8 @@ import GymTracker from '../../components/GymTracker';
 import BalootTracker from '../../components/BalootTracker';
 import HorseRidingTracker from '../../components/HorseRidingTracker';
 import LapTracker from '../../components/LapTracker';
+import FootballTracker from '../../components/FootballTracker';
+import MatchTracker from '../../components/MatchTracker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -413,61 +415,7 @@ export default function HomeScreen() {
     return formatDuration(getDurationSeconds());
   };
   
-  const addMatchRound = () => {
-    const cleanTeamOneGames = matchTeamOneGames.trim();
-    const cleanTeamTwoGames = matchTeamTwoGames.trim();
-
-    if (cleanTeamOneGames === '') {
-      alert('Please enter Team 1 games');
-      return;
-    }
-
-    if (cleanTeamTwoGames === '') {
-      alert('Please enter Team 2 games');
-      return;
-    }
-
-    const teamOneNumber = Number(cleanTeamOneGames);
-    const teamTwoNumber = Number(cleanTeamTwoGames);
-
-    if (Number.isNaN(teamOneNumber) || Number.isNaN(teamTwoNumber)) {
-      alert('Games must be numbers');
-      return;
-    }
-
-    if (teamOneNumber > 6 || teamTwoNumber > 6) {
-      alert('Each round should be 6 games or less');
-      return;
-    }
-
-    const newRound: MatchRound = {
-      id: Date.now(),
-      teamOneGames: cleanTeamOneGames,
-      teamTwoGames: cleanTeamTwoGames,
-    };
-
-    setMatchRounds([...matchRounds, newRound]);
-    setMatchTeamOneGames('');
-    setMatchTeamTwoGames('');
-  };
-
-  const deleteMatchRound = (roundId: number) => {
-    const newRounds = matchRounds.filter((round) => round.id !== roundId);
-    setMatchRounds(newRounds);
-  };
-
-  const getMatchTeamOneTotal = () => {
-    return matchRounds.reduce((total, round) => {
-      return total + Number(round.teamOneGames || 0);
-    }, 0);
-  };
-
-  const getMatchTeamTwoTotal = () => {
-    return matchRounds.reduce((total, round) => {
-      return total + Number(round.teamTwoGames || 0);
-    }, 0);
-  };
-
+   
   const getBalootUsTotalFromScores = (scores: BalootScore[]) => {
     return scores.reduce((total, score) => {
       return total + Number(score.us || 0);
@@ -795,144 +743,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderFootballFields = () => {
-    if (selectedActivity !== 'Football') {
-      return null;
-    }
-
-    return (
-      <View style={styles.detailsBox}>
-        <Text style={styles.detailsTitle}>Football Details</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Team 1 name"
-          placeholderTextColor="#888"
-          value={footballTeamOneName}
-          onChangeText={setFootballTeamOneName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Team 2 name"
-          placeholderTextColor="#888"
-          value={footballTeamTwoName}
-          onChangeText={setFootballTeamTwoName}
-        />
-
-        <View style={styles.scoreRow}>
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Team 1 score"
-            placeholderTextColor="#888"
-            value={footballTeamOneScore}
-            onChangeText={setFootballTeamOneScore}
-            keyboardType="number-pad"
-          />
-
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Team 2 score"
-            placeholderTextColor="#888"
-            value={footballTeamTwoScore}
-            onChangeText={setFootballTeamTwoScore}
-            keyboardType="number-pad"
-          />
-        </View>
-      </View>
-    );
-  };
-
-  const renderMatchFields = () => {
-    if (!isMatchActivity(selectedActivity)) {
-      return null;
-    }
-
-    return (
-      <View style={styles.detailsBox}>
-        <Text style={styles.detailsTitle}>{selectedActivity} Match</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Team 1 name"
-          placeholderTextColor="#888"
-          value={matchTeamOneName}
-          onChangeText={setMatchTeamOneName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Team 2 name"
-          placeholderTextColor="#888"
-          value={matchTeamTwoName}
-          onChangeText={setMatchTeamTwoName}
-        />
-
-        <Text style={styles.detailsSubtitle}>Add round score</Text>
-
-        <View style={styles.scoreRow}>
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Team 1 games"
-            placeholderTextColor="#888"
-            value={matchTeamOneGames}
-            onChangeText={setMatchTeamOneGames}
-            keyboardType="number-pad"
-          />
-
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Team 2 games"
-            placeholderTextColor="#888"
-            value={matchTeamTwoGames}
-            onChangeText={setMatchTeamTwoGames}
-            keyboardType="number-pad"
-          />
-        </View>
-
-        <TouchableOpacity style={styles.addExerciseButton} onPress={addMatchRound}>
-          <Text style={styles.buttonText}>+ Add Round</Text>
-        </TouchableOpacity>
-
-        <View style={styles.exerciseListBox}>
-          <Text style={styles.exerciseListTitle}>Rounds Added</Text>
-
-          {matchRounds.length === 0 ? (
-            <Text style={styles.emptyHistory}>No rounds added yet</Text>
-          ) : (
-            matchRounds.map((round, index) => (
-              <View key={round.id} style={styles.exerciseRow}>
-                <View style={styles.exerciseInfo}>
-                  <Text style={styles.exerciseName}>
-                    Round {index + 1}: {round.teamOneGames} - {round.teamTwoGames}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.exerciseDeleteButton}
-                  onPress={() => deleteMatchRound(round.id)}
-                >
-                  <Text style={styles.exerciseDeleteText}>X</Text>
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
-
-        <View style={styles.matchTotalBox}>
-          <Text style={styles.matchTotalTitle}>Total Games</Text>
-          <Text style={styles.matchTotalText}>
-            {matchTeamOneName || 'Team 1'}: {getMatchTeamOneTotal()}
-          </Text>
-          <Text style={styles.matchTotalText}>
-            {matchTeamTwoName || 'Team 2'}: {getMatchTeamTwoTotal()}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-  
   const renderSessionDetails = (session: Session) => {
     if (session.activity === 'Football' && session.details) {
       return (
@@ -1179,7 +989,18 @@ export default function HomeScreen() {
           <Text style={styles.title}>{selectedActivity}</Text>
           <Text style={styles.subtitle}>Track your activity session</Text>
 
-          {renderFootballFields()}
+          <FootballTracker
+  selectedActivity={selectedActivity}
+  footballTeamOneName={footballTeamOneName}
+  setFootballTeamOneName={setFootballTeamOneName}
+  footballTeamTwoName={footballTeamTwoName}
+  setFootballTeamTwoName={setFootballTeamTwoName}
+  footballTeamOneScore={footballTeamOneScore}
+  setFootballTeamOneScore={setFootballTeamOneScore}
+  footballTeamTwoScore={footballTeamTwoScore}
+  setFootballTeamTwoScore={setFootballTeamTwoScore}
+/>
+
           <GymTracker
   selectedActivity={selectedActivity}
   gymWorkoutDay={gymWorkoutDay}
@@ -1204,8 +1025,19 @@ export default function HomeScreen() {
   startTime={startTime}
   endTime={endTime}
 />
-          {renderMatchFields()}
-          
+<MatchTracker
+  selectedActivity={selectedActivity}
+  matchTeamOneName={matchTeamOneName}
+  setMatchTeamOneName={setMatchTeamOneName}
+  matchTeamTwoName={matchTeamTwoName}
+  setMatchTeamTwoName={setMatchTeamTwoName}
+  matchTeamOneGames={matchTeamOneGames}
+  setMatchTeamOneGames={setMatchTeamOneGames}
+  matchTeamTwoGames={matchTeamTwoGames}
+  setMatchTeamTwoGames={setMatchTeamTwoGames}
+  matchRounds={matchRounds}
+  setMatchRounds={setMatchRounds}
+/>          
           <BalootTracker
   selectedActivity={selectedActivity}
   balootUsScore={balootUsScore}
@@ -1551,39 +1383,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  detailsBox: {
-    backgroundColor: '#1b2733',
-    padding: 18,
-    borderRadius: 16,
-    marginBottom: 22,
-  },
-  detailsTitle: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 14,
-  },
-  detailsSubtitle: {
-    color: '#b0b0b0',
-    fontSize: 16,
-    marginBottom: 12,
-    marginTop: 6,
-  },
-  
-  scoreRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  scoreInput: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 12,
-    color: '#000000',
-  },
-  
   addExerciseButton: {
     backgroundColor: '#2563eb',
     padding: 16,
@@ -1647,23 +1446,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
   },
-  matchTotalBox: {
-    backgroundColor: '#101820',
-    padding: 14,
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  matchTotalTitle: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  matchTotalText: {
-    color: '#ffffff',
-    fontSize: 17,
-    marginBottom: 4,
-  },
+
   balootTotalBox: {
     flexDirection: 'row',
     gap: 12,
