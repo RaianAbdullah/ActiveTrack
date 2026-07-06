@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import GymTracker from '../../components/GymTracker';
 import BalootTracker from '../../components/BalootTracker';
 import HorseRidingTracker from '../../components/HorseRidingTracker';
+import LapTracker from '../../components/LapTracker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -17,8 +18,6 @@ import {
   GestureHandlerRootView,
   Swipeable,
 } from 'react-native-gesture-handler';
-
-
 import {
   BalootScore,
   GymExercise,
@@ -363,24 +362,6 @@ export default function HomeScreen() {
     }
 
     setEndTime(new Date());
-  };
-
-  const addLap = () => {
-    if (!startTime) {
-      alert('Please start the activity first');
-      return;
-    }
-
-    if (endTime) {
-      alert('Activity already ended');
-      return;
-    }
-
-    setLapCount(lapCount + 1);
-  };
-
-  const resetLaps = () => {
-    setLapCount(0);
   };
 
   const getTotalLapDistance = () => {
@@ -862,67 +843,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderLapFields = () => {
-    if (!isLapActivity(selectedActivity)) {
-      return null;
-    }
-
-    return (
-      <View style={styles.detailsBox}>
-        <Text style={styles.detailsTitle}>{selectedActivity} Laps</Text>
-
-        <Text style={styles.detailsSubtitle}>Lap distance</Text>
-
-        <View style={styles.scoreRow}>
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Lap distance"
-            placeholderTextColor="#888"
-            value={lapDistance}
-            onChangeText={setLapDistance}
-            keyboardType="decimal-pad"
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.unitButton,
-              lapDistanceUnit === 'm' && styles.selectedUnitButton,
-            ]}
-            onPress={() => setLapDistanceUnit('m')}
-          >
-            <Text style={styles.unitButtonText}>m</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.unitButton,
-              lapDistanceUnit === 'km' && styles.selectedUnitButton,
-            ]}
-            onPress={() => setLapDistanceUnit('km')}
-          >
-            <Text style={styles.unitButtonText}>km</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.lapBox}>
-          <Text style={styles.lapNumber}>{lapCount}</Text>
-          <Text style={styles.lapLabel}>laps completed</Text>
-          <Text style={styles.totalDistanceText}>
-            Total distance: {getTotalLapDistance()}
-          </Text>
-        </View>
-
-        <TouchableOpacity style={styles.addExerciseButton} onPress={addLap}>
-          <Text style={styles.buttonText}>+ Add Lap</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.resetLapButton} onPress={resetLaps}>
-          <Text style={styles.buttonText}>Reset Laps</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   const renderMatchFields = () => {
     if (!isMatchActivity(selectedActivity)) {
       return null;
@@ -1273,7 +1193,17 @@ export default function HomeScreen() {
   gymExercises={gymExercises}
   setGymExercises={setGymExercises}
 />
-          {renderLapFields()}
+<LapTracker
+  selectedActivity={selectedActivity}
+  lapCount={lapCount}
+  setLapCount={setLapCount}
+  lapDistance={lapDistance}
+  setLapDistance={setLapDistance}
+  lapDistanceUnit={lapDistanceUnit}
+  setLapDistanceUnit={setLapDistanceUnit}
+  startTime={startTime}
+  endTime={endTime}
+/>
           {renderMatchFields()}
           
           <BalootTracker
@@ -1653,22 +1583,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: '#000000',
   },
-  unitButton: {
-    backgroundColor: '#34495e',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 54,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedUnitButton: {
-    backgroundColor: '#1f8a70',
-  },
-  unitButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '800',
-  },
   
   addExerciseButton: {
     backgroundColor: '#2563eb',
@@ -1688,29 +1602,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 4,
-  },
-  lapBox: {
-    backgroundColor: '#101820',
-    padding: 22,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  lapNumber: {
-    color: '#ffffff',
-    fontSize: 54,
-    fontWeight: 'bold',
-  },
-  lapLabel: {
-    color: '#b0b0b0',
-    fontSize: 17,
-    marginTop: 4,
-  },
-  totalDistanceText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 10,
   },
   exerciseListBox: {
     backgroundColor: '#101820',
