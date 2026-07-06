@@ -42,6 +42,7 @@ const gymWorkoutDays = [
 
 const lapActivities = ['Run', 'Walking', 'Cycling', 'Swimming'];
 const matchActivities = ['Padel', 'Tennis'];
+const dealerDirections = ['↑', '→', '↓', '←'];
 
 type GymSet = {
   id: number;
@@ -90,6 +91,7 @@ type SessionDetails = {
   balootUsTotal?: number;
   balootThemTotal?: number;
   balootWinner?: string;
+  balootDealerDirection?: string;
 };
 
 type Session = {
@@ -139,6 +141,7 @@ export default function HomeScreen() {
   const [balootUsScore, setBalootUsScore] = useState('');
   const [balootThemScore, setBalootThemScore] = useState('');
   const [balootScores, setBalootScores] = useState<BalootScore[]>([]);
+  const [balootDealerDirection, setBalootDealerDirection] = useState('↑');
 
   useEffect(() => {
     loadSavedData();
@@ -243,6 +246,7 @@ export default function HomeScreen() {
     setBalootUsScore('');
     setBalootThemScore('');
     setBalootScores([]);
+    setBalootDealerDirection('↑');
   };
 
   const openActivity = (activity: string) => {
@@ -613,10 +617,27 @@ export default function HomeScreen() {
     setBalootScores(newScores);
   };
 
+  const deleteLastBalootScore = () => {
+    if (balootScores.length === 0) {
+      alert('No score to delete');
+      return;
+    }
+
+    const newScores = balootScores.slice(0, -1);
+    setBalootScores(newScores);
+  };
+
   const resetBalootScores = () => {
     setBalootScores([]);
     setBalootUsScore('');
     setBalootThemScore('');
+  };
+
+  const changeDealerDirection = () => {
+    const currentIndex = dealerDirections.indexOf(balootDealerDirection);
+    const nextIndex = (currentIndex + 1) % dealerDirections.length;
+
+    setBalootDealerDirection(dealerDirections[nextIndex]);
   };
 
   const saveSession = () => {
@@ -759,6 +780,7 @@ export default function HomeScreen() {
         balootUsTotal: usTotal,
         balootThemTotal: themTotal,
         balootWinner: getBalootWinner(usTotal, themTotal),
+        balootDealerDirection: balootDealerDirection,
       };
     }
 
@@ -1221,6 +1243,12 @@ export default function HomeScreen() {
           <Text style={styles.winnerText}>{getCurrentBalootWinner()}</Text>
         </View>
 
+        <TouchableOpacity style={styles.dealerBox} onPress={changeDealerDirection}>
+          <Text style={styles.dealerTitle}>Dealer Direction</Text>
+          <Text style={styles.dealerArrow}>{balootDealerDirection}</Text>
+          <Text style={styles.dealerHint}>Tap to change dealer</Text>
+        </TouchableOpacity>
+
         <Text style={styles.detailsSubtitle}>Add hand score</Text>
 
         <View style={styles.scoreRow}>
@@ -1245,6 +1273,10 @@ export default function HomeScreen() {
 
         <TouchableOpacity style={styles.addExerciseButton} onPress={addBalootScore}>
           <Text style={styles.buttonText}>+ Add Score</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteLastButton} onPress={deleteLastBalootScore}>
+          <Text style={styles.buttonText}>Delete Last Score</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.resetLapButton} onPress={resetBalootScores}>
@@ -1387,6 +1419,9 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.savedDetailsText}>
             Winner: {session.details.balootWinner || 'Not finished yet'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
+            Dealer Direction: {session.details.balootDealerDirection || '↑'}
           </Text>
 
           <Text style={styles.savedDetailsHeader}>Hands:</Text>
@@ -1789,6 +1824,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 14,
   },
+  deleteLastButton: {
+    backgroundColor: '#b84040',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
   resetLapButton: {
     backgroundColor: '#34495e',
     padding: 16,
@@ -1921,6 +1962,28 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  dealerBox: {
+    backgroundColor: '#101820',
+    padding: 18,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dealerTitle: {
+    color: '#b0b0b0',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  dealerArrow: {
+    color: '#ffffff',
+    fontSize: 64,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  dealerHint: {
+    color: '#9ca3af',
+    fontSize: 14,
   },
   startButton: {
     backgroundColor: '#1f8a70',
