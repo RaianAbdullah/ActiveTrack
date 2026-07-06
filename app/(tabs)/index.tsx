@@ -1194,7 +1194,10 @@ const logout = () => {
       <View style={styles.mainContainer}>
         <ScrollView style={styles.container}>
           <Text style={styles.title}>ActiveTrack</Text>
-          <Text style={styles.subtitle}>Choose your activity</Text>
+          <Text style={styles.subtitle}>Welcome, {loginUsername}</Text>
+          <Text style={styles.homeDescription}>
+            Track sports, training, horse riding, studying, and game sessions.
+          </Text>
 
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <Text style={styles.logoutButtonText}>Logout</Text>
@@ -1756,5 +1759,11 @@ logoutButtonText: {
   fontSize: 16,
   fontWeight: '700',
   textAlign: 'center',
+},
+homeDescription: {
+  color: '#9ca3af',
+  fontSize: 15,
+  lineHeight: 22,
+  marginBottom: 20,
 },
 });
