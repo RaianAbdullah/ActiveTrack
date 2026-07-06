@@ -1,10 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import GymTracker from '../../components/GymTracker';
-import BalootTracker from '../../components/BalootTracker';
-import HorseRidingTracker from '../../components/HorseRidingTracker';
-import LapTracker from '../../components/LapTracker';
-import FootballTracker from '../../components/FootballTracker';
-import MatchTracker from '../../components/MatchTracker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -20,6 +14,12 @@ import {
   GestureHandlerRootView,
   Swipeable,
 } from 'react-native-gesture-handler';
+import BalootTracker from '../../components/BalootTracker';
+import FootballTracker from '../../components/FootballTracker';
+import GymTracker from '../../components/GymTracker';
+import HorseRidingTracker from '../../components/HorseRidingTracker';
+import LapTracker from '../../components/LapTracker';
+import MatchTracker from '../../components/MatchTracker';
 import {
   BalootScore,
   GymExercise,
