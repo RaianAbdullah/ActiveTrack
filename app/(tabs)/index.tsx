@@ -139,7 +139,10 @@ export default function HomeScreen() {
 
   setIsLoggedIn(true);
 };
-
+const logout = () => {
+  setIsLoggedIn(false);
+  setLoginPassword('');
+};
   const loadSavedData = async () => {
     try {
       const savedSessions = await AsyncStorage.getItem('sessions');
@@ -1193,6 +1196,10 @@ export default function HomeScreen() {
           <Text style={styles.title}>ActiveTrack</Text>
           <Text style={styles.subtitle}>Choose your activity</Text>
 
+          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+
           <View style={styles.statsBox}>
             <Text style={styles.statsTitle}>Stats</Text>
 
@@ -1737,5 +1744,17 @@ loginHint: {
   fontSize: 14,
   textAlign: 'center',
   marginTop: 12,
+},
+logoutButton: {
+  backgroundColor: '#34495e',
+  padding: 12,
+  borderRadius: 12,
+  marginBottom: 20,
+},
+logoutButtonText: {
+  color: '#ffffff',
+  fontSize: 16,
+  fontWeight: '700',
+  textAlign: 'center',
 },
 });
