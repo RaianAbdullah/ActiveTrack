@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import HorseRidingTracker from '../../components/HorseRidingTracker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -15,6 +14,8 @@ import {
   GestureHandlerRootView,
   Swipeable,
 } from 'react-native-gesture-handler';
+import BalootTracker from '../../components/BalootTracker';
+import HorseRidingTracker from '../../components/HorseRidingTracker';
 
 import {
   BalootScore,
@@ -51,7 +52,6 @@ const gymWorkoutDays = [
 
 const lapActivities = ['Run', 'Walking', 'Cycling', 'Swimming'];
 const matchActivities = ['Padel', 'Tennis'];
-const dealerDirections = ['↑', '→', '↓', '←'];
 
 
 export default function HomeScreen() {
@@ -560,14 +560,6 @@ export default function HomeScreen() {
     }, 0);
   };
 
-  const getBalootUsTotal = () => {
-    return getBalootUsTotalFromScores(balootScores);
-  };
-
-  const getBalootThemTotal = () => {
-    return getBalootThemTotalFromScores(balootScores);
-  };
-
   const getBalootWinner = (usTotal: number, themTotal: number) => {
     if (usTotal >= 152 && usTotal > themTotal) {
       return 'Us';
@@ -582,85 +574,6 @@ export default function HomeScreen() {
     }
 
     return 'Not finished yet';
-  };
-
-  const getCurrentBalootWinner = () => {
-    return getBalootWinner(getBalootUsTotal(), getBalootThemTotal());
-  };
-
-  const addBalootScore = () => {
-    const cleanUsScore = balootUsScore.trim();
-    const cleanThemScore = balootThemScore.trim();
-
-    if (cleanUsScore === '') {
-      alert('Please enter Us score');
-      return;
-    }
-
-    if (cleanThemScore === '') {
-      alert('Please enter Them score');
-      return;
-    }
-
-    const usNumber = Number(cleanUsScore);
-    const themNumber = Number(cleanThemScore);
-
-    if (Number.isNaN(usNumber) || Number.isNaN(themNumber)) {
-      alert('Scores must be numbers');
-      return;
-    }
-
-    if (usNumber < 0 || themNumber < 0) {
-      alert('Scores cannot be negative');
-      return;
-    }
-
-    const newScore: BalootScore = {
-      id: Date.now(),
-      us: cleanUsScore,
-      them: cleanThemScore,
-    };
-
-    const newScores = [...balootScores, newScore];
-    const usTotal = getBalootUsTotalFromScores(newScores);
-    const themTotal = getBalootThemTotalFromScores(newScores);
-    const winner = getBalootWinner(usTotal, themTotal);
-
-    setBalootScores(newScores);
-    setBalootUsScore('');
-    setBalootThemScore('');
-
-    if (winner === 'Us' || winner === 'Them') {
-      Alert.alert('Baloot Winner', `${winner} reached 152 and won.`);
-    }
-  };
-
-  const deleteBalootScore = (scoreId: number) => {
-    const newScores = balootScores.filter((score) => score.id !== scoreId);
-    setBalootScores(newScores);
-  };
-
-  const deleteLastBalootScore = () => {
-    if (balootScores.length === 0) {
-      alert('No score to delete');
-      return;
-    }
-
-    const newScores = balootScores.slice(0, -1);
-    setBalootScores(newScores);
-  };
-
-  const resetBalootScores = () => {
-    setBalootScores([]);
-    setBalootUsScore('');
-    setBalootThemScore('');
-  };
-
-  const changeDealerDirection = () => {
-    const currentIndex = dealerDirections.indexOf(balootDealerDirection);
-    const nextIndex = (currentIndex + 1) % dealerDirections.length;
-
-    setBalootDealerDirection(dealerDirections[nextIndex]);
   };
 
   const saveSession = () => {
@@ -1280,101 +1193,7 @@ export default function HomeScreen() {
     );
   };
 
-  const renderBalootFields = () => {
-    if (!isBalootActivity(selectedActivity)) {
-      return null;
-    }
-
-    return (
-      <View style={styles.detailsBox}>
-        <Text style={styles.detailsTitle}>Baloot Calculator</Text>
-        <Text style={styles.detailsSubtitle}>First side to 152 wins</Text>
-
-        <View style={styles.balootTotalBox}>
-          <View style={styles.balootTotalColumn}>
-            <Text style={styles.balootSideTitle}>Us</Text>
-            <Text style={styles.balootTotalNumber}>{getBalootUsTotal()}</Text>
-          </View>
-
-          <View style={styles.balootTotalColumn}>
-            <Text style={styles.balootSideTitle}>Them</Text>
-            <Text style={styles.balootTotalNumber}>{getBalootThemTotal()}</Text>
-          </View>
-        </View>
-
-        <View style={styles.winnerBox}>
-          <Text style={styles.winnerLabel}>Winner</Text>
-          <Text style={styles.winnerText}>{getCurrentBalootWinner()}</Text>
-        </View>
-
-        <TouchableOpacity style={styles.dealerBox} onPress={changeDealerDirection}>
-          <Text style={styles.dealerTitle}>Dealer Direction</Text>
-          <Text style={styles.dealerArrow}>{balootDealerDirection}</Text>
-          <Text style={styles.dealerHint}>Tap to change dealer</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.detailsSubtitle}>Add hand score</Text>
-
-        <View style={styles.scoreRow}>
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Us"
-            placeholderTextColor="#888"
-            value={balootUsScore}
-            onChangeText={setBalootUsScore}
-            keyboardType="number-pad"
-          />
-
-          <TextInput
-            style={styles.scoreInput}
-            placeholder="Them"
-            placeholderTextColor="#888"
-            value={balootThemScore}
-            onChangeText={setBalootThemScore}
-            keyboardType="number-pad"
-          />
-        </View>
-
-        <TouchableOpacity style={styles.addExerciseButton} onPress={addBalootScore}>
-          <Text style={styles.buttonText}>+ Add Score</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.deleteLastButton} onPress={deleteLastBalootScore}>
-          <Text style={styles.buttonText}>Delete Last Score</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.resetLapButton} onPress={resetBalootScores}>
-          <Text style={styles.buttonText}>Reset Baloot Scores</Text>
-        </TouchableOpacity>
-
-        <View style={styles.exerciseListBox}>
-          <Text style={styles.exerciseListTitle}>Score History</Text>
-
-          {balootScores.length === 0 ? (
-            <Text style={styles.emptyHistory}>No scores added yet</Text>
-          ) : (
-            balootScores.map((score, index) => (
-              <View key={score.id} style={styles.exerciseRow}>
-                <View style={styles.exerciseInfo}>
-                  <Text style={styles.exerciseName}>
-                    Hand {index + 1}: Us {score.us} - Them {score.them}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.exerciseDeleteButton}
-                  onPress={() => deleteBalootScore(score.id)}
-                >
-                  <Text style={styles.exerciseDeleteText}>X</Text>
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
-      </View>
-    );
-  };
-
+  
   const renderSessionDetails = (session: Session) => {
     if (session.activity === 'Football' && session.details) {
       return (
@@ -1625,7 +1444,18 @@ export default function HomeScreen() {
           {renderGymFields()}
           {renderLapFields()}
           {renderMatchFields()}
-          {renderBalootFields()}
+          
+          <BalootTracker
+  selectedActivity={selectedActivity}
+  balootUsScore={balootUsScore}
+  setBalootUsScore={setBalootUsScore}
+  balootThemScore={balootThemScore}
+  setBalootThemScore={setBalootThemScore}
+  balootScores={balootScores}
+  setBalootScores={setBalootScores}
+  balootDealerDirection={balootDealerDirection}
+  setBalootDealerDirection={setBalootDealerDirection}
+/>
           
           <HorseRidingTracker
   selectedActivity={selectedActivity}
@@ -1844,7 +1674,7 @@ export default function HomeScreen() {
     </GestureHandlerRootView>
   );
 }
-
+  
 const styles = StyleSheet.create({
   root: {
     flex: 1,
