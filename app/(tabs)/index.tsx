@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import HorseRidingTracker from '../../components/HorseRidingTracker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -961,23 +962,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderYesNoButton = (
-    label: string,
-    value: boolean,
-    onPress: () => void
-  ) => {
-    return (
-      <TouchableOpacity
-        style={[styles.toggleButton, value && styles.selectedToggleButton]}
-        onPress={onPress}
-      >
-        <Text style={[styles.toggleText, value && styles.selectedToggleText]}>
-          {label}: {value ? 'Yes' : 'No'}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
   const renderFootballFields = () => {
     if (selectedActivity !== 'Football') {
       return null;
@@ -1391,208 +1375,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderHorseRidingFields = () => {
-    if (!isHorseRidingActivity(selectedActivity)) {
-      return null;
-    }
-
-    return (
-      <View style={styles.detailsBox}>
-        <Text style={styles.detailsTitle}>Horse Riding</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Horse name, example: Durkji"
-          placeholderTextColor="#888"
-          value={horseName}
-          onChangeText={setHorseName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Training type, example: Dressage / Flatwork / Jumping"
-          placeholderTextColor="#888"
-          value={horseTrainingType}
-          onChangeText={setHorseTrainingType}
-        />
-
-        {renderYesNoButton('Rest Day', horseRestDay, () => setHorseRestDay(!horseRestDay))}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Daily walking minutes"
-          placeholderTextColor="#888"
-          value={horseWalkingMinutes}
-          onChangeText={setHorseWalkingMinutes}
-          keyboardType="number-pad"
-        />
-
-        <Text style={styles.detailsSubtitle}>Daily Care</Text>
-
-        {renderYesNoButton('Hay Given', horseHayGiven, () => setHorseHayGiven(!horseHayGiven))}
-        {renderYesNoButton('Water Checked', horseWaterChecked, () => setHorseWaterChecked(!horseWaterChecked))}
-
-        {renderYesNoButton('Food Oil Given', horseFoodOilGiven, () => setHorseFoodOilGiven(!horseFoodOilGiven))}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Food oil buying date, example: 06/07/2026"
-          placeholderTextColor="#888"
-          value={horseFoodOilBuyingDate}
-          onChangeText={setHorseFoodOilBuyingDate}
-        />
-
-        {renderYesNoButton('Hoof Oil Used', horseHoofOilUsed, () => setHorseHoofOilUsed(!horseHoofOilUsed))}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Hoof oil buying date, example: 06/07/2026"
-          placeholderTextColor="#888"
-          value={horseHoofOilBuyingDate}
-          onChangeText={setHorseHoofOilBuyingDate}
-        />
-
-        <Text style={styles.detailsSubtitle}>Cleaning Supplies</Text>
-
-        {renderYesNoButton('Shampoo Used', horseShampooUsed, () => setHorseShampooUsed(!horseShampooUsed))}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Shampoo buying date, example: 06/07/2026"
-          placeholderTextColor="#888"
-          value={horseShampooBuyingDate}
-          onChangeText={setHorseShampooBuyingDate}
-        />
-
-        {renderYesNoButton('Pads Cleaning Supplies Used', horsePadsCleaningSuppliesUsed, () =>
-          setHorsePadsCleaningSuppliesUsed(!horsePadsCleaningSuppliesUsed)
-        )}
-
-        <TextInput
-          style={styles.input}
-          placeholder="Pads cleaning supplies buying date"
-          placeholderTextColor="#888"
-          value={horsePadsCleaningSuppliesBuyingDate}
-          onChangeText={setHorsePadsCleaningSuppliesBuyingDate}
-        />
-
-        <Text style={styles.detailsSubtitle}>Monthly Feed</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Re-Leve amount, example: 2 kg"
-          placeholderTextColor="#888"
-          value={horseReleveAmount}
-          onChangeText={setHorseReleveAmount}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Re-Leve buying date, example: 06/07/2026"
-          placeholderTextColor="#888"
-          value={horseReleveBuyingDate}
-          onChangeText={setHorseReleveBuyingDate}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Equi Jewel amount, example: 0.5 kg"
-          placeholderTextColor="#888"
-          value={horseEquiJewelAmount}
-          onChangeText={setHorseEquiJewelAmount}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Equi Jewel buying date, example: 06/07/2026"
-          placeholderTextColor="#888"
-          value={horseEquiJewelBuyingDate}
-          onChangeText={setHorseEquiJewelBuyingDate}
-        />
-
-        <Text style={styles.detailsSubtitle}>Dressage Test</Text>
-
-        {renderYesNoButton('Dressage Test Day', horseDressageTestDay, () =>
-          setHorseDressageTestDay(!horseDressageTestDay)
-        )}
-
-        {horseDressageTestDay && (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Dressage test name"
-              placeholderTextColor="#888"
-              value={horseDressageTestName}
-              onChangeText={setHorseDressageTestName}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Dressage score %, example: 68.5"
-              placeholderTextColor="#888"
-              value={horseDressageScore}
-              onChangeText={setHorseDressageScore}
-              keyboardType="decimal-pad"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Dressage judge notes"
-              placeholderTextColor="#888"
-              value={horseDressageNotes}
-              onChangeText={setHorseDressageNotes}
-            />
-          </>
-        )}
-
-        <Text style={styles.detailsSubtitle}>Jumping</Text>
-
-        {renderYesNoButton('Jumping Day', horseJumpingDay, () =>
-          setHorseJumpingDay(!horseJumpingDay)
-        )}
-
-        {horseJumpingDay && (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Fence height, example: 80 cm"
-              placeholderTextColor="#888"
-              value={horseFenceHeight}
-              onChangeText={setHorseFenceHeight}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Fence count"
-              placeholderTextColor="#888"
-              value={horseFenceCount}
-              onChangeText={setHorseFenceCount}
-              keyboardType="number-pad"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Jumping notes"
-              placeholderTextColor="#888"
-              value={horseJumpingNotes}
-              onChangeText={setHorseJumpingNotes}
-            />
-          </>
-        )}
-
-        <Text style={styles.detailsSubtitle}>Notes</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Horse riding notes"
-          placeholderTextColor="#888"
-          value={horseNotes}
-          onChangeText={setHorseNotes}
-        />
-      </View>
-    );
-  };
-
   const renderSessionDetails = (session: Session) => {
     if (session.activity === 'Football' && session.details) {
       return (
@@ -1844,7 +1626,64 @@ export default function HomeScreen() {
           {renderLapFields()}
           {renderMatchFields()}
           {renderBalootFields()}
-          {renderHorseRidingFields()}
+          
+          <HorseRidingTracker
+  selectedActivity={selectedActivity}
+  horseName={horseName}
+  setHorseName={setHorseName}
+  horseTrainingType={horseTrainingType}
+  setHorseTrainingType={setHorseTrainingType}
+  horseRestDay={horseRestDay}
+  setHorseRestDay={setHorseRestDay}
+  horseWalkingMinutes={horseWalkingMinutes}
+  setHorseWalkingMinutes={setHorseWalkingMinutes}
+  horseHayGiven={horseHayGiven}
+  setHorseHayGiven={setHorseHayGiven}
+  horseWaterChecked={horseWaterChecked}
+  setHorseWaterChecked={setHorseWaterChecked}
+  horseFoodOilGiven={horseFoodOilGiven}
+  setHorseFoodOilGiven={setHorseFoodOilGiven}
+  horseShampooUsed={horseShampooUsed}
+  setHorseShampooUsed={setHorseShampooUsed}
+  horsePadsCleaningSuppliesUsed={horsePadsCleaningSuppliesUsed}
+  setHorsePadsCleaningSuppliesUsed={setHorsePadsCleaningSuppliesUsed}
+  horseHoofOilUsed={horseHoofOilUsed}
+  setHorseHoofOilUsed={setHorseHoofOilUsed}
+  horseReleveAmount={horseReleveAmount}
+  setHorseReleveAmount={setHorseReleveAmount}
+  horseReleveBuyingDate={horseReleveBuyingDate}
+  setHorseReleveBuyingDate={setHorseReleveBuyingDate}
+  horseEquiJewelAmount={horseEquiJewelAmount}
+  setHorseEquiJewelAmount={setHorseEquiJewelAmount}
+  horseEquiJewelBuyingDate={horseEquiJewelBuyingDate}
+  setHorseEquiJewelBuyingDate={setHorseEquiJewelBuyingDate}
+  horseFoodOilBuyingDate={horseFoodOilBuyingDate}
+  setHorseFoodOilBuyingDate={setHorseFoodOilBuyingDate}
+  horseShampooBuyingDate={horseShampooBuyingDate}
+  setHorseShampooBuyingDate={setHorseShampooBuyingDate}
+  horsePadsCleaningSuppliesBuyingDate={horsePadsCleaningSuppliesBuyingDate}
+  setHorsePadsCleaningSuppliesBuyingDate={setHorsePadsCleaningSuppliesBuyingDate}
+  horseHoofOilBuyingDate={horseHoofOilBuyingDate}
+  setHorseHoofOilBuyingDate={setHorseHoofOilBuyingDate}
+  horseDressageTestDay={horseDressageTestDay}
+  setHorseDressageTestDay={setHorseDressageTestDay}
+  horseDressageTestName={horseDressageTestName}
+  setHorseDressageTestName={setHorseDressageTestName}
+  horseDressageScore={horseDressageScore}
+  setHorseDressageScore={setHorseDressageScore}
+  horseDressageNotes={horseDressageNotes}
+  setHorseDressageNotes={setHorseDressageNotes}
+  horseJumpingDay={horseJumpingDay}
+  setHorseJumpingDay={setHorseJumpingDay}
+  horseFenceHeight={horseFenceHeight}
+  setHorseFenceHeight={setHorseFenceHeight}
+  horseFenceCount={horseFenceCount}
+  setHorseFenceCount={setHorseFenceCount}
+  horseJumpingNotes={horseJumpingNotes}
+  setHorseJumpingNotes={setHorseJumpingNotes}
+  horseNotes={horseNotes}
+  setHorseNotes={setHorseNotes}
+/>
 
           <TouchableOpacity style={styles.startButton} onPress={startActivity}>
             <Text style={styles.buttonText}>Start Activity</Text>
@@ -2372,25 +2211,6 @@ const styles = StyleSheet.create({
   dealerHint: {
     color: '#9ca3af',
     fontSize: 14,
-  },
-  toggleButton: {
-    backgroundColor: '#34495e',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  selectedToggleButton: {
-    backgroundColor: '#1f8a70',
-  },
-  toggleText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  selectedToggleText: {
-    color: '#ffffff',
-    fontWeight: '800',
   },
   startButton: {
     backgroundColor: '#1f8a70',
