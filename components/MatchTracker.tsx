@@ -97,7 +97,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 1 name"
-        placeholderTextColor="#888"
+        placeholderTextColor="#8f8f92"
         value={props.matchTeamOneName}
         onChangeText={props.setMatchTeamOneName}
       />
@@ -105,7 +105,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 2 name"
-        placeholderTextColor="#888"
+        placeholderTextColor="#8f8f92"
         value={props.matchTeamTwoName}
         onChangeText={props.setMatchTeamTwoName}
       />
@@ -116,7 +116,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 games"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={props.matchTeamOneGames}
           onChangeText={props.setMatchTeamOneGames}
           keyboardType="number-pad"
@@ -125,7 +125,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 games"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={props.matchTeamTwoGames}
           onChangeText={props.setMatchTeamTwoGames}
           keyboardType="number-pad"
@@ -176,7 +176,7 @@ export default function MatchTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   detailsSubtitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
     marginBottom: 12,
     marginTop: 6,
@@ -215,14 +215,14 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   addExerciseButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#5a5a5d',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   exerciseListBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 14,
     borderRadius: 12,
     marginTop: 4,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#34495e',
+    borderBottomColor: '#3a3a3d',
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   exerciseDeleteButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   matchTotalBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 14,
     borderRadius: 12,
     marginTop: 8,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   emptyHistory: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
   },
   buttonText: {

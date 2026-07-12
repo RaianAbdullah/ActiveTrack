@@ -626,7 +626,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 24,
   },
 
@@ -646,12 +646,12 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 18,
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     marginBottom: 24,
   },
 
   clearButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     paddingVertical: 9,
     paddingHorizontal: 13,
     borderRadius: 10,
@@ -668,22 +668,22 @@ const styles = StyleSheet.create({
   },
 
   filterButton: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 20,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#34495e',
+    borderColor: '#3a3a3d',
   },
 
   filterButtonActive: {
-    backgroundColor: '#1f8a70',
-    borderColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
+    borderColor: '#4a4a4d',
   },
 
   filterText: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -693,12 +693,12 @@ const styles = StyleSheet.create({
   },
 
   emptyText: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
   },
 
   card: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 16,
     borderRadius: 14,
     marginBottom: 14,
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
   },
 
   badge: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -740,20 +740,20 @@ const styles = StyleSheet.create({
   timeBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 12,
     borderRadius: 10,
   },
 
   timeText: {
-    color: '#d0d0d0',
+    color: '#d6d6d8',
     fontSize: 14,
     fontWeight: '600',
   },
 
   detailsBox: {
     marginTop: 10,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 12,
     borderRadius: 10,
   },
@@ -784,14 +784,14 @@ const styles = StyleSheet.create({
   },
 
   setText: {
-    color: '#d0d0d0',
+    color: '#d6d6d8',
     fontSize: 15,
     marginLeft: 12,
     marginBottom: 3,
   },
 
   deleteButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 12,
     borderRadius: 10,
     marginTop: 14,

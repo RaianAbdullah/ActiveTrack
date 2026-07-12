@@ -169,7 +169,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Example: Boxing"
-              placeholderTextColor="#888"
+              placeholderTextColor="#8f8f92"
               value={otherActivityName}
               onChangeText={setOtherActivityName}
             />
@@ -194,12 +194,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
   },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
   },
   backButton: {
     marginTop: 55,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     marginBottom: 24,
   },
   activityList: {
@@ -227,12 +227,12 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   activityButton: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     padding: 18,
     borderRadius: 14,
   },
   otherButton: {
-    backgroundColor: '#34495e',
+    backgroundColor: '#3a3a3d',
   },
   activityText: {
     color: '#ffffff',
@@ -240,25 +240,25 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   startButton: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     padding: 18,
     borderRadius: 14,
     marginBottom: 14,
   },
   endButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 18,
     borderRadius: 14,
     marginBottom: 24,
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#5a5a5d',
     padding: 18,
     borderRadius: 14,
     marginTop: 24,
   },
   cancelButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 16,
     borderRadius: 12,
   },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   infoBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 14,
   },
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     borderRadius: 18,
     padding: 24,
   },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalSubtitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
     marginBottom: 18,
   },

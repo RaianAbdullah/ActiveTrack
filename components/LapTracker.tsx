@@ -75,7 +75,7 @@ export default function LapTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Lap distance"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={props.lapDistance}
           onChangeText={props.setLapDistance}
           keyboardType="decimal-pad"
@@ -123,7 +123,7 @@ export default function LapTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   detailsSubtitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
     marginBottom: 12,
     marginTop: 6,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   unitButton: {
-    backgroundColor: '#34495e',
+    backgroundColor: '#3a3a3d',
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 54,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectedUnitButton: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
   },
   unitButtonText: {
     color: '#ffffff',
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   lapBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 22,
     borderRadius: 14,
     alignItems: 'center',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   lapLabel: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 17,
     marginTop: 4,
   },
@@ -193,14 +193,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   addExerciseButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#5a5a5d',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   resetLapButton: {
-    backgroundColor: '#34495e',
+    backgroundColor: '#3a3a3d',
     padding: 16,
     borderRadius: 12,
     marginBottom: 4,

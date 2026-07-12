@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -49,6 +50,7 @@ const matchActivities = ['Padel', 'Tennis'];
 
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -127,8 +129,23 @@ export default function HomeScreen() {
   const [vehicleName, setVehicleName] = useState('');
 const [vehicleServiceType, setVehicleServiceType] = useState('');
 const [vehicleMileage, setVehicleMileage] = useState('');
-const [vehicleCost, setVehicleCost] = useState('');
-const [vehicleNotes, setVehicleNotes] = useState('');
+  const [vehicleCost, setVehicleCost] = useState('');
+  const [vehicleNotes, setVehicleNotes] = useState('');
+
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: isLoggedIn
+        ? {
+            backgroundColor: '#0f0f10',
+            borderTopColor: '#1f1f22',
+            borderTopWidth: 1,
+            height: 85,
+            paddingTop: 8,
+            paddingBottom: 18,
+          }
+        : { display: 'none' },
+    });
+  }, [isLoggedIn, navigation]);
 
   useEffect(() => {
     loadSavedData();
@@ -1116,7 +1133,7 @@ const getGroupedActivities = () => {
         <TextInput
           style={styles.input}
           placeholder="Username or phone number"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={loginUsername}
           onChangeText={setLoginUsername}
         />
@@ -1124,7 +1141,7 @@ const getGroupedActivities = () => {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={loginPassword}
           onChangeText={setLoginPassword}
           secureTextEntry
@@ -1282,7 +1299,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Vehicle name, example: Indian Motorcycle"
-      placeholderTextColor="#888"
+      placeholderTextColor="#8f8f92"
       value={vehicleName}
       onChangeText={setVehicleName}
     />
@@ -1305,7 +1322,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Mileage / KM"
-      placeholderTextColor="#888"
+      placeholderTextColor="#8f8f92"
       value={vehicleMileage}
       onChangeText={setVehicleMileage}
       keyboardType="numeric"
@@ -1314,7 +1331,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Cost"
-      placeholderTextColor="#888"
+      placeholderTextColor="#8f8f92"
       value={vehicleCost}
       onChangeText={setVehicleCost}
       keyboardType="numeric"
@@ -1323,7 +1340,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Notes"
-      placeholderTextColor="#888"
+      placeholderTextColor="#8f8f92"
       value={vehicleNotes}
       onChangeText={setVehicleNotes}
       multiline
@@ -1453,7 +1470,7 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Example: Boxing"
-                placeholderTextColor="#888"
+                placeholderTextColor="#8f8f92"
                 value={otherActivityName}
                 onChangeText={setOtherActivityName}
               />
@@ -1485,12 +1502,12 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
   },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
   },
   backButton: {
     marginTop: 55,
@@ -1510,11 +1527,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     marginBottom: 24,
   },
   statsBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
@@ -1529,7 +1546,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statLabel: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 15,
     marginBottom: 3,
   },
@@ -1539,7 +1556,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   hintText: {
-    color: '#9ca3af',
+    color: '#a7a7aa',
     fontSize: 14,
     marginBottom: 12,
   },
@@ -1550,13 +1567,13 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     padding: 14,
     borderRadius: 12,
   },
   resetButton: {
     flex: 1,
-    backgroundColor: '#34495e',
+    backgroundColor: '#3a3a3d',
     padding: 14,
     borderRadius: 12,
   },
@@ -1581,7 +1598,7 @@ activityGroupTitle: {
     paddingBottom: 30,
   },
   activityButton: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     padding: 18,
     borderRadius: 14,
     marginBottom: 12,
@@ -1592,7 +1609,7 @@ activityGroupTitle: {
     fontWeight: '600',
   },
   swipeDeleteAction: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     justifyContent: 'center',
     alignItems: 'center',
     width: 95,
@@ -1605,26 +1622,26 @@ activityGroupTitle: {
     fontWeight: '700',
   },
   addExerciseButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#5a5a5d',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   deleteLastButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
   },
   resetLapButton: {
-    backgroundColor: '#34495e',
+    backgroundColor: '#3a3a3d',
     padding: 16,
     borderRadius: 12,
     marginBottom: 4,
   },
   exerciseListBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 14,
     borderRadius: 12,
     marginTop: 4,
@@ -1640,7 +1657,7 @@ activityGroupTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#34495e',
+    borderBottomColor: '#3a3a3d',
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
@@ -1654,7 +1671,7 @@ activityGroupTitle: {
     marginBottom: 4,
   },
   exerciseDeleteButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -1675,13 +1692,13 @@ activityGroupTitle: {
   },
   balootTotalColumn: {
     flex: 1,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     borderRadius: 14,
     padding: 18,
     alignItems: 'center',
   },
   balootSideTitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 18,
     marginBottom: 8,
   },
@@ -1691,13 +1708,13 @@ activityGroupTitle: {
     fontWeight: 'bold',
   },
   winnerBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 14,
     borderRadius: 12,
     marginBottom: 16,
   },
   winnerLabel: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 15,
     marginBottom: 4,
   },
@@ -1707,14 +1724,14 @@ activityGroupTitle: {
     fontWeight: 'bold',
   },
   dealerBox: {
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 18,
     borderRadius: 14,
     alignItems: 'center',
     marginBottom: 16,
   },
   dealerTitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
     marginBottom: 8,
   },
@@ -1725,30 +1742,30 @@ activityGroupTitle: {
     marginBottom: 4,
   },
   dealerHint: {
-    color: '#9ca3af',
+    color: '#a7a7aa',
     fontSize: 14,
   },
   startButton: {
-    backgroundColor: '#1f8a70',
+    backgroundColor: '#4a4a4d',
     padding: 18,
     borderRadius: 14,
     marginBottom: 14,
   },
   endButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 18,
     borderRadius: 14,
     marginBottom: 24,
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#5a5a5d',
     padding: 18,
     borderRadius: 14,
     marginTop: 24,
     marginBottom: 60,
   },
   cancelButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     padding: 16,
     borderRadius: 12,
   },
@@ -1759,7 +1776,7 @@ activityGroupTitle: {
     textAlign: 'center',
   },
   infoBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 14,
   },
@@ -1781,7 +1798,7 @@ activityGroupTitle: {
     padding: 24,
   },
   modalBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     borderRadius: 18,
     padding: 24,
   },
@@ -1792,7 +1809,7 @@ activityGroupTitle: {
     marginBottom: 8,
   },
   modalSubtitle: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
     marginBottom: 18,
   },
@@ -1809,22 +1826,22 @@ activityGroupTitle: {
 },
 
 historyFilterButton: {
-  backgroundColor: '#1b2733',
+  backgroundColor: '#1f1f22',
   paddingVertical: 10,
   paddingHorizontal: 14,
   borderRadius: 20,
   marginRight: 10,
   borderWidth: 1,
-  borderColor: '#34495e',
+  borderColor: '#3a3a3d',
 },
 
 historyFilterButtonActive: {
-  backgroundColor: '#1f8a70',
-  borderColor: '#1f8a70',
+  backgroundColor: '#4a4a4d',
+  borderColor: '#4a4a4d',
 },
 
 historyFilterText: {
-  color: '#b0b0b0',
+  color: '#b8b8bb',
   fontSize: 14,
   fontWeight: '600',
 },
@@ -1848,7 +1865,7 @@ historyFilterTextActive: {
     fontWeight: 'bold',
   },
   clearHistoryButton: {
-    backgroundColor: '#b84040',
+    backgroundColor: '#3f3f42',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -1859,11 +1876,11 @@ historyFilterTextActive: {
     fontWeight: '600',
   },
   emptyHistory: {
-    color: '#b0b0b0',
+    color: '#b8b8bb',
     fontSize: 16,
   },
   sessionCard: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 16,
     borderRadius: 14,
     marginBottom: 12,
@@ -1875,7 +1892,7 @@ historyFilterTextActive: {
     marginBottom: 8,
   },
   sessionText: {
-    color: '#d0d0d0',
+    color: '#d6d6d8',
     fontSize: 16,
     marginBottom: 4,
   },
@@ -1887,7 +1904,7 @@ historyFilterTextActive: {
   },
   savedDetailsBox: {
     marginTop: 10,
-    backgroundColor: '#101820',
+    backgroundColor: '#0f0f10',
     padding: 12,
     borderRadius: 10,
   },
@@ -1904,7 +1921,7 @@ historyFilterTextActive: {
     marginBottom: 4,
   },
   savedSetText: {
-    color: '#d0d0d0',
+    color: '#d6d6d8',
     fontSize: 15,
     marginLeft: 12,
     marginBottom: 3,
@@ -1914,7 +1931,7 @@ historyFilterTextActive: {
   },
   loginContainer: {
   flex: 1,
-  backgroundColor: '#101820',
+  backgroundColor: '#0f0f10',
   padding: 24,
   justifyContent: 'center',
 },
@@ -1927,18 +1944,18 @@ loginTitle: {
 },
 loginSubtitle: {
   fontSize: 18,
-  color: '#b0b0b0',
+  color: '#b8b8bb',
   marginBottom: 30,
   textAlign: 'center',
 },
 loginHint: {
-  color: '#9ca3af',
+  color: '#a7a7aa',
   fontSize: 14,
   textAlign: 'center',
   marginTop: 12,
 },
 logoutButton: {
-  backgroundColor: '#34495e',
+  backgroundColor: '#3a3a3d',
   padding: 12,
   borderRadius: 12,
   marginBottom: 20,
@@ -1950,7 +1967,7 @@ logoutButtonText: {
   textAlign: 'center',
 },
 homeDescription: {
-  color: '#9ca3af',
+  color: '#a7a7aa',
   fontSize: 15,
   lineHeight: 22,
   marginBottom: 20,
@@ -1963,7 +1980,7 @@ sessionTopRow: {
 },
 
 activityBadge: {
-  backgroundColor: '#1f8a70',
+  backgroundColor: '#4a4a4d',
   paddingVertical: 6,
   paddingHorizontal: 12,
   borderRadius: 999,
@@ -1976,7 +1993,7 @@ activityBadgeText: {
 },
 
 sessionDate: {
-  color: '#b0b0b0',
+  color: '#b8b8bb',
   fontSize: 14,
   fontWeight: '600',
 },
@@ -1991,18 +2008,18 @@ sessionDurationLarge: {
 sessionTimeRow: {
   flexDirection: 'row',
   justifyContent: 'space-between',
-  backgroundColor: '#101820',
+  backgroundColor: '#0f0f10',
   padding: 12,
   borderRadius: 10,
   marginBottom: 8,
 },
 
 sessionTimeText: {
-  color: '#d0d0d0',
+  color: '#d6d6d8',
   fontSize: 14,
   fontWeight: '600',
 },
 selectedOptionButton: {
-  backgroundColor: '#2563eb',
+  backgroundColor: '#5a5a5d',
 },
 });

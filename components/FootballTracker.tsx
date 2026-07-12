@@ -34,7 +34,7 @@ export default function FootballTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 1 name"
-        placeholderTextColor="#888"
+        placeholderTextColor="#8f8f92"
         value={props.footballTeamOneName}
         onChangeText={props.setFootballTeamOneName}
       />
@@ -42,7 +42,7 @@ export default function FootballTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 2 name"
-        placeholderTextColor="#888"
+        placeholderTextColor="#8f8f92"
         value={props.footballTeamTwoName}
         onChangeText={props.setFootballTeamTwoName}
       />
@@ -51,7 +51,7 @@ export default function FootballTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 score"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={props.footballTeamOneScore}
           onChangeText={props.setFootballTeamOneScore}
           keyboardType="number-pad"
@@ -60,7 +60,7 @@ export default function FootballTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 score"
-          placeholderTextColor="#888"
+          placeholderTextColor="#8f8f92"
           value={props.footballTeamTwoScore}
           onChangeText={props.setFootballTeamTwoScore}
           keyboardType="number-pad"
@@ -72,7 +72,7 @@ export default function FootballTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1b2733',
+    backgroundColor: '#1f1f22',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
