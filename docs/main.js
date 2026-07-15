@@ -51,19 +51,15 @@ const translations = {
     signUp: 'Sign up',
     welcomeBack: 'Welcome back',
     createAccount: 'Create your account',
-    recoverAccount: 'Recover account',
     createProfile: 'Create an ActiveTrack profile for this browser.',
     signInDescription: 'Sign in to continue tracking on this device.',
-    resetDescription: 'Use your recovery code to set a new password.',
     name: 'Name',
     signinIdentifier: 'Username or email',
     signupIdentifier: 'Email or phone',
     password: 'Password',
     confirmPassword: 'Confirm password',
     passwordMinimum: 'Password must be at least 8 characters.',
-    recoveryCode: 'Recovery code',
     newPassword: 'New password',
-    resetPassword: 'Reset password',
     passkey: 'Use Face ID / Passkey',
     forgot: 'Forgot username or password?',
     signupLegal:
@@ -73,12 +69,9 @@ const translations = {
     facebookSignin: 'Log in with Facebook',
     appleSignup: 'Sign up with Apple',
     facebookSignup: 'Sign up with Facebook',
-    backToSignin: 'Back to sign in',
-    saveRecoveryCode: 'Save this recovery code',
-    recoveryHelp: 'You need it if you forget your password.',
     securityTitle: 'Security on this device',
     securityText:
-      'Password hashes, recovery code login reset, Face ID / passkey support, and history saved until you delete it.',
+      'Password hashes, Face ID / passkey support, and history saved until you delete it.',
     home: 'Home',
     homeTitle: 'What do you want to track?',
     welcome: 'Choose an activity and save it to History.',
@@ -146,19 +139,15 @@ const translations = {
     signUp: 'إنشاء حساب',
     welcomeBack: 'مرحباً بعودتك',
     createAccount: 'إنشاء حساب',
-    recoverAccount: 'استرجاع الحساب',
     createProfile: 'أنشئ ملف ActiveTrack لهذا المتصفح.',
     signInDescription: 'سجل الدخول لمتابعة التتبع على هذا الجهاز.',
-    resetDescription: 'استخدم رمز الاسترجاع لتعيين كلمة مرور جديدة.',
     name: 'الاسم',
     signinIdentifier: 'اسم المستخدم أو البريد',
     signupIdentifier: 'البريد أو رقم الجوال',
     password: 'كلمة المرور',
     confirmPassword: 'تأكيد كلمة المرور',
     passwordMinimum: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
-    recoveryCode: 'رمز الاسترجاع',
     newPassword: 'كلمة مرور جديدة',
-    resetPassword: 'إعادة تعيين كلمة المرور',
     passkey: 'استخدام Face ID / مفتاح المرور',
     forgot: 'نسيت اسم المستخدم أو كلمة المرور؟',
     signupLegal:
@@ -168,12 +157,9 @@ const translations = {
     facebookSignin: 'تسجيل الدخول باستخدام Facebook',
     appleSignup: 'إنشاء حساب باستخدام Apple',
     facebookSignup: 'إنشاء حساب باستخدام Facebook',
-    backToSignin: 'العودة لتسجيل الدخول',
-    saveRecoveryCode: 'احفظ رمز الاسترجاع',
-    recoveryHelp: 'ستحتاجه إذا نسيت كلمة المرور.',
     securityTitle: 'الأمان على هذا الجهاز',
     securityText:
-      'تجزئة كلمة المرور، استرجاع الحساب برمز خاص، دعم Face ID / مفاتيح المرور، وحفظ السجل حتى تحذفه.',
+      'تجزئة كلمة المرور، دعم Face ID / مفاتيح المرور، وحفظ السجل حتى تحذفه.',
     home: 'الرئيسية',
     homeTitle: 'ماذا تريد أن تتتبع؟',
     welcome: 'اختر نشاطاً واحفظه في السجل.',
@@ -276,14 +262,10 @@ const authMessage = document.querySelector('#auth-message');
 const identifierInput = document.querySelector('input[name="identifier"]');
 const passwordInput = document.querySelector('#auth-password');
 const repeatPasswordInput = document.querySelector('input[name="repeatPassword"]');
-const recoveryCodeInput = document.querySelector('input[name="recoveryCode"]');
-const newPasswordInput = document.querySelector('input[name="newPassword"]');
 const passkeyButton = document.querySelector('#passkey-button');
 const forgotButton = document.querySelector('#forgot-button');
 const appleSignupButton = document.querySelector('#apple-signup-button');
 const facebookSignupButton = document.querySelector('#facebook-signup-button');
-const recoveryCard = document.querySelector('#recovery-card');
-const recoveryCodeOutput = document.querySelector('#recovery-code');
 const backButton = document.querySelector('#back-button');
 const languageButton = document.querySelector('#language-button');
 const logoutButton = document.querySelector('#logout-button');
@@ -344,14 +326,10 @@ function applyLanguage() {
   setText('#password-label', state.authMode === 'signup' ? text('newPassword') : text('password'));
   setText('#repeat-password-label', text('confirmPassword'));
   setText('#password-minimum', text('passwordMinimum'));
-  setText('#recovery-label', text('recoveryCode'));
-  setText('#new-password-label', text('newPassword'));
   setText('#passkey-button', text('passkey'));
   setText('#signup-divider', text('or'));
   setText('#apple-signup-button', state.authMode === 'signup' ? text('appleSignup') : text('appleSignin'));
   setText('#facebook-signup-button', state.authMode === 'signup' ? text('facebookSignup') : text('facebookSignin'));
-  setText('#recovery-card-title', text('saveRecoveryCode'));
-  setText('#recovery-card-text', text('recoveryHelp'));
   setText('#security-title', text('securityTitle'));
   setText('#security-text', text('securityText'));
   setText('#home-eyebrow', text('home'));
@@ -479,37 +457,26 @@ function getActivities() {
 function setAuthMode(mode) {
   state.authMode = mode;
   const isSignup = mode === 'signup';
-  const isReset = mode === 'reset';
 
   authCard.classList.toggle('signup-mode', isSignup);
-  authCard.classList.toggle('reset-mode', isReset);
-  authTitle.textContent = isSignup
-    ? text('createAccount')
-    : isReset
-      ? text('recoverAccount')
-      : text('welcomeBack');
-  authDescription.textContent = isSignup
-    ? text('createProfile')
-    : isReset
-      ? text('resetDescription')
-      : text('signInDescription');
-  authSubmit.textContent = isSignup ? text('signUp') : isReset ? text('resetPassword') : text('signIn');
+  authTitle.textContent = isSignup ? text('createAccount') : text('welcomeBack');
+  authDescription.textContent = isSignup ? text('createProfile') : text('signInDescription');
+  authSubmit.textContent = isSignup ? text('signUp') : text('signIn');
   document.querySelector('#identifier-label').textContent = isSignup ? text('signupIdentifier') : text('signinIdentifier');
   document.querySelector('#password-label').textContent = isSignup ? text('newPassword') : text('password');
   appleSignupButton.textContent = isSignup ? text('appleSignup') : text('appleSignin');
   facebookSignupButton.textContent = isSignup ? text('facebookSignup') : text('facebookSignin');
-  identifierInput.required = !isReset;
-  passwordInput.required = !isReset;
+  identifierInput.required = true;
+  passwordInput.required = true;
   repeatPasswordInput.required = isSignup;
-  recoveryCodeInput.required = isReset;
-  newPasswordInput.required = isReset;
-  passwordInput.closest('label').style.display = isReset ? 'none' : 'grid';
+  repeatPasswordInput.closest('label').style.display = isSignup ? 'grid' : 'none';
+  passwordInput.closest('label').style.display = 'grid';
   passwordInput.autocomplete = isSignup ? 'new-password' : 'current-password';
-  passkeyButton.style.display = isReset ? 'none' : 'inline-flex';
-  document.querySelector('.signup-divider').style.display = isReset ? 'none' : 'block';
-  document.querySelector('.signup-social').style.display = isReset ? 'none' : 'grid';
-  forgotButton.textContent = isReset ? text('backToSignin') : text('forgot');
-  recoveryCard.classList.add('hidden');
+  passkeyButton.style.display = 'inline-flex';
+  document.querySelector('.signup-divider').style.display = 'block';
+  document.querySelector('.signup-social').style.display = 'grid';
+  forgotButton.style.display = isSignup ? 'none' : 'inline-flex';
+  forgotButton.textContent = text('forgot');
   authMessage.textContent = '';
 
   document.querySelectorAll('[data-auth-mode]').forEach((tab) => {
@@ -1224,8 +1191,6 @@ authForm.addEventListener('submit', async (event) => {
   const identifier = String(formData.get('identifier') || '').trim();
   const password = String(formData.get('password') || '');
   const repeatPassword = String(formData.get('repeatPassword') || '');
-  const newPassword = String(formData.get('newPassword') || '');
-  const recoveryCode = String(formData.get('recoveryCode') || '').trim();
 
   try {
     if (state.authMode === 'signup') {
@@ -1240,8 +1205,6 @@ authForm.addEventListener('submit', async (event) => {
       }
 
       const passwordSalt = bytesToBase64(crypto.getRandomValues(new Uint8Array(16)));
-      const recoverySalt = bytesToBase64(crypto.getRandomValues(new Uint8Array(16)));
-      const generatedRecoveryCode = randomToken(18);
       const user = {
         schemaVersion: 2,
         createdAt: new Date().toISOString(),
@@ -1250,8 +1213,6 @@ authForm.addEventListener('submit', async (event) => {
         goal: null,
         passwordSalt,
         passwordHash: await hashSecret(password, passwordSalt),
-        recoverySalt,
-        recoveryHash: await hashSecret(generatedRecoveryCode, recoverySalt),
         passkey: null,
       };
 
@@ -1263,45 +1224,11 @@ authForm.addEventListener('submit', async (event) => {
       }
 
       writeJson(storageKeys.user, user);
-      recoveryCodeOutput.textContent = generatedRecoveryCode;
-      recoveryCard.classList.remove('hidden');
       authForm.reset();
       setAuthMode('signin');
-      recoveryCard.classList.remove('hidden');
       authMessage.textContent = user.passkey
         ? 'Account created. Face ID / passkey is ready.'
-        : 'Account created. Save your recovery code before signing in.';
-      return;
-    }
-
-    if (state.authMode === 'reset') {
-      const savedUser = currentUser();
-
-      if (!savedUser?.recoveryHash || !savedUser?.recoverySalt) {
-        authMessage.textContent = 'No recoverable account exists on this device.';
-        return;
-      }
-
-      if (newPassword.length < 8) {
-        authMessage.textContent = 'Use at least 8 characters for the new password.';
-        return;
-      }
-
-      const recoveryHash = await hashSecret(recoveryCode, savedUser.recoverySalt);
-
-      if (!timingSafeEqual(recoveryHash, savedUser.recoveryHash)) {
-        authMessage.textContent = 'Recovery code is not correct.';
-        return;
-      }
-
-      const passwordSalt = bytesToBase64(crypto.getRandomValues(new Uint8Array(16)));
-      savedUser.passwordSalt = passwordSalt;
-      savedUser.passwordHash = await hashSecret(newPassword, passwordSalt);
-      savedUser.updatedAt = new Date().toISOString();
-      writeJson(storageKeys.user, savedUser);
-      authForm.reset();
-      setAuthMode('signin');
-      authMessage.textContent = `Password reset. Your username is ${savedUser.identifier}.`;
+        : 'Account created. You can sign in now.';
       return;
     }
 
@@ -1343,7 +1270,7 @@ authForm.addEventListener('submit', async (event) => {
 });
 
 forgotButton.addEventListener('click', () => {
-  setAuthMode(state.authMode === 'reset' ? 'signin' : 'reset');
+  authMessage.textContent = 'Password recovery can be connected later.';
 });
 
 passkeyButton.addEventListener('click', loginWithPasskey);

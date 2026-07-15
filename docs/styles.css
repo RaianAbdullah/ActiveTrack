@@ -251,12 +251,12 @@ textarea:focus {
   outline: none;
 }
 
-.signup-only,
-.reset-only {
+.form-grid .signup-only,
+.form-grid .reset-only {
   display: none;
 }
 
-.auth-card.signup-mode .signup-only {
+.auth-card.signup-mode .form-grid .signup-only {
   display: grid;
 }
 
@@ -267,14 +267,6 @@ textarea:focus {
 
 .auth-card.signup-mode .signup-social {
   display: grid;
-}
-
-.auth-card.reset-mode .reset-only {
-  display: grid;
-}
-
-.auth-card.reset-mode .signup-only {
-  display: none;
 }
 
 .button,
@@ -344,7 +336,6 @@ textarea:focus {
   font-weight: 900;
 }
 
-.recovery-card,
 .security-note {
   display: grid;
   gap: 8px;
@@ -354,17 +345,6 @@ textarea:focus {
   background: rgba(246, 193, 119, 0.08);
 }
 
-.recovery-card.hidden {
-  display: none;
-}
-
-.recovery-card code {
-  overflow-wrap: anywhere;
-  color: var(--amber);
-  font-size: 0.95rem;
-}
-
-.recovery-card span,
 .security-note span {
   color: var(--muted);
   font-size: 0.86rem;

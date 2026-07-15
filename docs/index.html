@@ -62,14 +62,6 @@
                 <span id="repeat-password-label">Confirm password</span>
                 <input name="repeatPassword" type="password" autocomplete="new-password" placeholder="Confirm password" />
               </label>
-              <label class="reset-only">
-                <span id="recovery-label">Recovery code</span>
-                <input name="recoveryCode" type="text" autocomplete="off" placeholder="Paste your recovery code" />
-              </label>
-              <label class="reset-only">
-                <span id="new-password-label">New password</span>
-                <input name="newPassword" type="password" autocomplete="new-password" placeholder="Create a new password" />
-              </label>
               <p class="signup-help signup-only" id="password-minimum">Password must be at least 8 characters.</p>
               <button class="button primary" id="auth-submit" type="submit">Sign in</button>
               <button class="button secondary" id="passkey-button" type="button">Use Face ID / Passkey</button>
@@ -80,14 +72,9 @@
               </div>
               <button class="link-button" id="forgot-button" type="button">Forgot username or password?</button>
               <p class="status-text" id="auth-message" role="status"></p>
-              <div class="recovery-card hidden" id="recovery-card">
-                <strong id="recovery-card-title">Save this recovery code</strong>
-                <code id="recovery-code"></code>
-                <span id="recovery-card-text">You need it if you forget your password.</span>
-              </div>
               <div class="security-note">
                 <strong id="security-title">Security on this device</strong>
-                <span id="security-text">Password hashes, recovery code login reset, Face ID / passkey support, and history saved until you delete it.</span>
+                <span id="security-text">Password hashes, Face ID / passkey support, and history saved until you delete it.</span>
               </div>
             </form>
           </div>
