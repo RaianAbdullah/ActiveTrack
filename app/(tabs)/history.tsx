@@ -4,9 +4,11 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,12 +18,16 @@ import {
   clearCloudSessions,
   deleteCloudSession,
   loadCloudSessions,
+  saveCloudSession,
 } from '../../lib/sessionDatabase';
 
 export default function HistoryScreen() {
   const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [historyFilter, setHistoryFilter] = useState('All');
+  const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editNote, setEditNote] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -97,6 +103,47 @@ export default function HistoryScreen() {
         },
       ]
     );
+  };
+
+  const openEditSession = (session: Session) => {
+    setEditingSession(session);
+    setEditDate(session.date || '');
+    setEditNote(session.details?.historyNote || '');
+  };
+
+  const closeEditSession = () => {
+    setEditingSession(null);
+    setEditDate('');
+    setEditNote('');
+  };
+
+  const saveEditedSession = async () => {
+    if (!editingSession) {
+      return;
+    }
+
+    const updatedSession: Session = {
+      ...editingSession,
+      date: editDate.trim() || editingSession.date,
+      details: {
+        ...(editingSession.details || {}),
+        historyNote: editNote.trim(),
+      },
+    };
+    const updatedSessions = sessions.map((session) =>
+      session.id === updatedSession.id ? updatedSession : session
+    );
+
+    setSessions(updatedSessions);
+    await saveSessions(updatedSessions);
+
+    try {
+      await saveCloudSession(updatedSession);
+    } catch {
+      alert('Saved on this device, but cloud update failed.');
+    }
+
+    closeEditSession();
   };
 
   const clearAllHistory = () => {
@@ -402,6 +449,25 @@ export default function HistoryScreen() {
               )
             )
           )}
+        </View>
+      );
+    }
+
+    if (session.activity === 'Work' && session.details?.work) {
+      const work = session.details.work;
+
+      return (
+        <View style={styles.detailsBox}>
+          <Text style={styles.detailsTitle}>Work</Text>
+          <Text style={styles.detailsText}>
+            Project: {work.projectName || 'Not filled'}
+          </Text>
+          <Text style={styles.detailsText}>
+            Candle Timer: {work.candleTime || '00:00:00'}
+          </Text>
+          <Text style={styles.detailsText}>
+            Notes: {work.notes || 'None'}
+          </Text>
         </View>
       );
     }
@@ -834,19 +900,69 @@ export default function HistoryScreen() {
               </View>
             )}
 
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() =>
-                confirmDeleteSession(session.id)
-              }
-            >
-              <Text style={styles.deleteButtonText}>
-                Delete Session
-              </Text>
-            </TouchableOpacity>
+            {session.details?.historyNote && (
+              <View style={styles.detailsBox}>
+                <Text style={styles.detailsTitle}>History Note</Text>
+                <Text style={styles.detailsText}>{session.details.historyNote}</Text>
+              </View>
+            )}
+
+            <View style={styles.sessionActions}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => openEditSession(session)}
+              >
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => confirmDeleteSession(session.id)}
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ))
       )}
+
+      <Modal
+        visible={Boolean(editingSession)}
+        transparent
+        animationType="fade"
+        onRequestClose={closeEditSession}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.editModal}>
+            <Text style={styles.editModalTitle}>Edit Session</Text>
+            <Text style={styles.editLabel}>Session date</Text>
+            <TextInput
+              style={styles.editInput}
+              value={editDate}
+              onChangeText={setEditDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#20242A"
+            />
+            <Text style={styles.editLabel}>History note</Text>
+            <TextInput
+              style={[styles.editInput, styles.editNoteInput]}
+              value={editNote}
+              onChangeText={setEditNote}
+              placeholder="Add a note"
+              placeholderTextColor="#20242A"
+              multiline
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancelButton} onPress={closeEditSession}>
+                <Text style={styles.editButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalSaveButton} onPress={saveEditedSession}>
+                <Text style={styles.editButtonText}>Save Changes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.bottomSpace} />
     </ScrollView>
@@ -1110,6 +1226,7 @@ const styles = StyleSheet.create({
   detailsText: {
     color: '#20242A',
     fontSize: 16,
+    fontWeight: '700',
     marginBottom: 4,
   },
 
@@ -1124,11 +1241,31 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
 
-  deleteButton: {
+  sessionActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+
+  editButton: {
+    flex: 1,
     backgroundColor: '#E7E9EE',
     padding: 12,
     borderRadius: 10,
-    marginTop: 14,
+  },
+
+  editButtonText: {
+    color: '#20242A',
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#E7E9EE',
+    padding: 12,
+    borderRadius: 10,
   },
 
   deleteButtonText: {
@@ -1136,6 +1273,76 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
+  },
+
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  },
+
+  editModal: {
+    padding: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
+    backgroundColor: '#F6F7F9',
+  },
+
+  editModalTitle: {
+    color: '#20242A',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 18,
+  },
+
+  editLabel: {
+    color: '#20242A',
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 7,
+  },
+
+  editInput: {
+    minHeight: 48,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    color: '#20242A',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+
+  editNoteInput: {
+    minHeight: 96,
+    paddingTop: 12,
+    textAlignVertical: 'top',
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+  modalCancelButton: {
+    flex: 1,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+  },
+
+  modalSaveButton: {
+    flex: 1,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
+    borderRadius: 8,
+    backgroundColor: '#E7E9EE',
   },
 
   bottomSpace: {

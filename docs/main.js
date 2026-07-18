@@ -572,12 +572,14 @@ function studyText(key) {
 function workText(key) {
   const labels = {
     en: {
+      title: 'Work Focus',
       projectName: 'Project name',
       projectPlaceholder: 'Tafasili website',
       notes: 'Work notes',
       projectRequired: 'Please enter project name.',
     },
     ar: {
+      title: 'تركيز العمل',
       projectName: 'اسم المشروع',
       projectPlaceholder: 'موقع تفاصيلي',
       notes: 'ملاحظات العمل',
@@ -876,7 +878,7 @@ function getCustomTemplateFields(activity) {
 }
 
 function supportsReminders(activity) {
-  return ['Gym', 'Horse Riding', 'Studying', 'Vehicle Maintenance'].includes(activity);
+  return ['Gym', 'Horse Riding', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity);
 }
 
 function isNonTimedActivity(activity) {
@@ -1140,7 +1142,7 @@ function openTracker(activity) {
   trackerView.classList.toggle('vehicle-mode', isNonTimedActivity(activity));
   activityFields.innerHTML = getFieldsForActivity(activity);
   bindConditionalFields();
-  if (activity === 'Studying') {
+  if (activity === 'Studying' || activity === 'Work') {
     resetStudyCandle();
     bindStudyCandle();
   }
@@ -1153,7 +1155,7 @@ function openTracker(activity) {
     bindBalootCalculator();
   }
   sessionForm.reset();
-  if (activity === 'Studying') {
+  if (activity === 'Studying' || activity === 'Work') {
     renderStudyCandle();
   }
   if (activity === 'Gym') {
@@ -1601,16 +1603,70 @@ function getFieldsForActivity(activity) {
   }
 
   if (activity === 'Work') {
-    return fieldGrid([
-      inputField(workText('projectName'), 'projectName', workText('projectPlaceholder')),
-      textAreaField(workText('notes'), 'notes', workText('notes'), true),
-    ]);
+    return `
+      <div class="study-focus">
+        <header>
+          <h2>${workText('title')}</h2>
+          <p>${state.language === 'ar' ? 'تركيز للعمل لمدة ثلاث ساعات' : 'Three-hour work focus'}</p>
+        </header>
+        <div class="field-grid">
+          ${inputField(workText('projectName'), 'projectName', workText('projectPlaceholder'))}
+        </div>
+        ${focusCandleMarkup('work')}
+        ${textAreaField(workText('notes'), 'notes', workText('notes'), true)}
+        ${reminderFields()}
+      </div>
+    `;
   }
 
   return fieldGrid([
     inputField('Session title', 'title', activity),
     textAreaField('Notes', 'notes', 'Add details', true),
   ]);
+}
+
+function focusCandleMarkup(mode) {
+  const isWork = mode === 'work';
+  const candleHint = isWork
+    ? state.language === 'ar' ? 'تركيز للعمل لمدة ثلاث ساعات' : 'Three-hour work focus'
+    : studyText('candleHint');
+  const completeText = isWork
+    ? state.language === 'ar' ? 'تم حفظ جلسة العمل لمدة ثلاث ساعات تلقائياً. هل تريد متابعة العمل؟' : 'Your three-hour work session was automatically saved. Continue working?'
+    : studyText('candleComplete');
+  const finishText = isWork
+    ? state.language === 'ar' ? 'ليس الآن' : 'Not now'
+    : studyText('finishStudying');
+
+  return `
+    <div class="study-candle-card">
+      <span>${studyText('candleTimer')}</span>
+      <div class="study-candle-visual">
+        <div class="study-candle-flame" id="study-candle-flame"></div>
+        <div class="study-candle-body" id="study-candle-body">
+          <div class="study-candle-wick"></div>
+          <div class="study-candle-wax-lip"></div>
+          <div class="study-candle-wax-drip"></div>
+        </div>
+      </div>
+      <strong id="study-candle-time">03:00:00</strong>
+      <p>${candleHint}</p>
+      <div class="study-candle-progress" aria-hidden="true">
+        <div id="study-candle-progress-fill"></div>
+      </div>
+      <div class="button-row">
+        <button class="button secondary" id="study-candle-start" type="button">${studyText('start')}</button>
+        <button class="button secondary" id="study-candle-pause" type="button">${studyText('pause')}</button>
+        <button class="button secondary" id="study-candle-stop" type="button">${studyText('stop')}</button>
+      </div>
+      <div class="study-candle-complete hidden" id="study-candle-complete" role="status">
+        <p>${completeText}</p>
+        <div class="button-row">
+          <button class="button primary" id="study-candle-restart" type="button">${studyText('startAnother')}</button>
+          <button class="button secondary" id="study-candle-finish" type="button">${finishText}</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function fieldGrid(fields) {
@@ -1753,6 +1809,14 @@ function bindStudyCandle() {
 }
 
 function startStudyCandle() {
+  if (
+    state.selectedActivity === 'Work' &&
+    !sessionForm.querySelector('[name="projectName"]')?.value.trim()
+  ) {
+    sessionMessage.textContent = workText('projectRequired');
+    return;
+  }
+
   if (state.studyCandleSeconds >= STUDY_CANDLE_DURATION_SECONDS) {
     startAnotherStudyCandle();
     return;
@@ -2481,7 +2545,7 @@ async function saveSession(event) {
     return;
   }
 
-  if (activity === 'Studying' && state.studyCandleAutoSaved) {
+  if ((activity === 'Studying' || activity === 'Work') && state.studyCandleAutoSaved) {
     sessionMessage.textContent = 'This three-hour candle is already saved.';
     return;
   }
@@ -2523,7 +2587,7 @@ async function saveSession(event) {
 
   state.sessions = [session, ...state.sessions];
   writeJson(accountStorageKey(storageKeys.sessions), state.sessions);
-  if (activity === 'Studying') {
+  if (activity === 'Studying' || activity === 'Work') {
     pauseStudyCandle();
   }
 
@@ -2581,6 +2645,8 @@ function getSessionDetails() {
     return {
       work: {
         projectName: sessionForm.querySelector('[name="projectName"]').value.trim(),
+        candleSeconds: state.studyCandleSeconds,
+        candleTime: formatStudyCandleElapsedTime(),
         notes: sessionForm.querySelector('[name="notes"]').value.trim(),
       },
     };
@@ -2708,7 +2774,10 @@ function renderHistory() {
               <h3>${activityLabel(session.activity)}</h3>
               <span>${formatDate(session.date)}</span>
             </div>
-            <button class="button danger" type="button" data-delete-session="${session.id}">${text('delete')}</button>
+            <div class="history-card-actions">
+              <button class="button secondary" type="button" data-edit-session="${session.id}">${state.language === 'ar' ? 'تعديل' : 'Edit'}</button>
+              <button class="button danger" type="button" data-delete-session="${session.id}">${text('delete')}</button>
+            </div>
           </header>
           ${
             isNonTimedActivity(session.activity)
@@ -2718,11 +2787,66 @@ function renderHistory() {
           <div class="history-details">
             ${details || `<div><span>${text('details')}</span>${text('noDetails')}</div>`}
             ${renderReminderDetails(session)}
+            ${renderHistoryNote(session)}
           </div>
         </article>
       `;
     })
     .join('');
+}
+
+function renderHistoryNote(session) {
+  const note = session.details?.historyNote;
+
+  if (!note) {
+    return '';
+  }
+
+  return `<div><span>${state.language === 'ar' ? 'ملاحظة السجل' : 'History note'}</span>${escapeHtml(note)}</div>`;
+}
+
+async function editHistorySession(sessionId) {
+  const session = state.sessions.find((item) => String(item.id) === String(sessionId));
+
+  if (!session) {
+    return;
+  }
+
+  const dateLabel = state.language === 'ar' ? 'تعديل تاريخ الجلسة' : 'Edit session date';
+  const noteLabel = state.language === 'ar' ? 'تعديل ملاحظة السجل' : 'Edit history note';
+  const nextDate = window.prompt(dateLabel, session.date || '');
+
+  if (nextDate === null) {
+    return;
+  }
+
+  const nextNote = window.prompt(noteLabel, session.details?.historyNote || '');
+
+  if (nextNote === null) {
+    return;
+  }
+
+  session.date = nextDate.trim() || session.date;
+  session.details = {
+    ...(session.details || {}),
+    historyNote: nextNote.trim(),
+  };
+  writeJson(accountStorageKey(storageKeys.sessions), state.sessions);
+
+  if (cloudClient && state.userId) {
+    const { error } = await cloudClient
+      .from('activity_sessions')
+      .update({ session_date: session.date, details: session.details })
+      .eq('user_id', state.userId)
+      .eq('id', session.id);
+
+    if (error) {
+      window.alert(state.language === 'ar' ? 'حُفظ التعديل على هذا الجهاز، لكن فشل الحفظ السحابي.' : 'Saved on this device, but cloud update failed.');
+    }
+  }
+
+  renderHome();
+  renderHistory();
 }
 
 function getRecentSessions(days) {
@@ -2876,6 +3000,7 @@ function renderSessionDetails(session) {
 
     return `
       <div><span>${workText('projectName')}</span>${escapeHtml(work.projectName || text('noDetails'))}</div>
+      <div><span>${studyText('candleTimer')}</span>${escapeHtml(work.candleTime || '00:00:00')}</div>
       <div><span>${workText('notes')}</span>${escapeHtml(work.notes || text('noDetails'))}</div>
     `;
   }
@@ -3142,6 +3267,7 @@ document.addEventListener('click', (event) => {
   const viewButton = event.target.closest('[data-view]');
   const activityButton = event.target.closest('[data-activity]');
   const categoryButton = event.target.closest('[data-category]');
+  const editButton = event.target.closest('[data-edit-session]');
   const deleteButton = event.target.closest('[data-delete-session]');
 
   if (viewButton) {
@@ -3156,6 +3282,10 @@ document.addEventListener('click', (event) => {
   if (categoryButton) {
     state.selectedCategory = categoryButton.dataset.category;
     renderHome();
+  }
+
+  if (editButton) {
+    void editHistorySession(editButton.dataset.editSession);
   }
 
   if (deleteButton) {

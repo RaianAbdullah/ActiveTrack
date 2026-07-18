@@ -251,6 +251,7 @@ export default function HomeScreen() {
 
   const latestStudySessionRef = useRef({
     sessions,
+    selectedActivity,
     startTime,
     subject: studySubject,
     studyType,
@@ -260,6 +261,8 @@ export default function HomeScreen() {
     streak: studyStreak,
     totalStudyHours: studyTotalHours,
     notes: studyNotes,
+    workProjectName,
+    workNotes,
     reminderDate,
     reminderTime,
     reminderNote,
@@ -267,6 +270,7 @@ export default function HomeScreen() {
 
   latestStudySessionRef.current = {
     sessions,
+    selectedActivity,
     startTime,
     subject: studySubject,
     studyType,
@@ -276,6 +280,8 @@ export default function HomeScreen() {
     streak: studyStreak,
     totalStudyHours: studyTotalHours,
     notes: studyNotes,
+    workProjectName,
+    workNotes,
     reminderDate,
     reminderTime,
     reminderNote,
@@ -628,7 +634,7 @@ const logout = async () => {
   };
 
   const supportsReminders = (activity: string | null) => {
-    return Boolean(activity && ['Gym', 'Horse Riding', 'Studying', 'Vehicle Maintenance'].includes(activity));
+    return Boolean(activity && ['Gym', 'Horse Riding', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity));
   };
 
   const formatStudyCandleDuration = (durationSeconds: number) => {
@@ -663,6 +669,7 @@ const logout = async () => {
 
   async function autoSaveCompletedStudyCandle() {
     const snapshot = latestStudySessionRef.current;
+    const focusActivity = snapshot.selectedActivity === 'Work' ? 'Work' : 'Studying';
     const completedAt = new Date();
     const sessionStart = snapshot.startTime || new Date(
       completedAt.getTime() - STUDY_CANDLE_DURATION_SECONDS * 1000
@@ -676,25 +683,36 @@ const logout = async () => {
       : undefined;
     const completedSession: Session = {
       id: Date.now(),
-      activity: 'Studying',
+      activity: focusActivity,
       start: sessionStart.toLocaleTimeString(),
       end: completedAt.toLocaleTimeString(),
       duration: formatStudyCandleDuration(STUDY_CANDLE_DURATION_SECONDS),
       durationSeconds: STUDY_CANDLE_DURATION_SECONDS,
       date: completedAt.toLocaleDateString(),
       details: {
-        studying: {
-          subject: snapshot.subject.trim(),
-          studyType: snapshot.studyType.trim(),
-          examDate: snapshot.examDate.trim(),
-          coursework: snapshot.coursework.trim(),
-          pomodoroPlan: snapshot.pomodoroPlan.trim(),
-          streak: snapshot.streak.trim(),
-          totalStudyHours: snapshot.totalStudyHours.trim(),
-          candleSeconds: STUDY_CANDLE_DURATION_SECONDS,
-          candleTime: formatStudyCandleDuration(STUDY_CANDLE_DURATION_SECONDS),
-          notes: snapshot.notes.trim(),
-        },
+        ...(focusActivity === 'Work'
+          ? {
+              work: {
+                projectName: snapshot.workProjectName.trim(),
+                candleSeconds: STUDY_CANDLE_DURATION_SECONDS,
+                candleTime: formatStudyCandleDuration(STUDY_CANDLE_DURATION_SECONDS),
+                notes: snapshot.workNotes.trim(),
+              },
+            }
+          : {
+              studying: {
+                subject: snapshot.subject.trim(),
+                studyType: snapshot.studyType.trim(),
+                examDate: snapshot.examDate.trim(),
+                coursework: snapshot.coursework.trim(),
+                pomodoroPlan: snapshot.pomodoroPlan.trim(),
+                streak: snapshot.streak.trim(),
+                totalStudyHours: snapshot.totalStudyHours.trim(),
+                candleSeconds: STUDY_CANDLE_DURATION_SECONDS,
+                candleTime: formatStudyCandleDuration(STUDY_CANDLE_DURATION_SECONDS),
+                notes: snapshot.notes.trim(),
+              },
+            }),
         ...(reminder ? { reminder } : {}),
       },
     };
@@ -717,7 +735,9 @@ const logout = async () => {
 
     Alert.alert(
       'Three-hour candle complete',
-      `Your study session was automatically saved to History. Continue studying?${cloudMessage}`,
+      focusActivity === 'Work'
+        ? `Your work session was automatically saved to History. Continue working?${cloudMessage}`
+        : `Your study session was automatically saved to History. Continue studying?${cloudMessage}`,
       [
         { text: 'Not now', style: 'cancel' },
         { text: 'Start another candle', onPress: startAnotherStudyCandle },
@@ -726,6 +746,11 @@ const logout = async () => {
   }
 
   const startStudyCandle = () => {
+    if (selectedActivity === 'Work' && !workProjectName.trim()) {
+      Alert.alert('Project name required', 'Enter the project name before starting the candle.');
+      return;
+    }
+
     if (studyCandleSeconds >= STUDY_CANDLE_DURATION_SECONDS) {
       startAnotherStudyCandle();
       return;
@@ -761,7 +786,7 @@ const logout = async () => {
   };
 
   const stopStudyCandle = () => {
-    setIsStudyCandleRunning(false);
+    pauseStudyCandle();
     setEndTime(new Date());
   };
 
@@ -1179,6 +1204,15 @@ if (!isNonTimedActivity(selectedActivity) && (!startTime || !endTime)) {
   return;
 }
 
+    if (
+      (isStudyingActivity(selectedActivity) || isWorkActivity(selectedActivity)) &&
+      studyCandleSeconds >= STUDY_CANDLE_DURATION_SECONDS &&
+      studyCandleAutoSaveStartedRef.current
+    ) {
+      alert('This three-hour candle is already saved.');
+      return;
+    }
+
     if (selectedActivity === 'Gym' && gymWorkoutDay === '') {
       alert('Please choose workout day');
       return;
@@ -1386,6 +1420,8 @@ if (!isNonTimedActivity(selectedActivity) && (!startTime || !endTime)) {
       newSession.details = {
         work: {
           projectName: workProjectName.trim(),
+          candleSeconds: studyCandleSeconds,
+          candleTime: formatStudyCandleElapsedTime(),
           notes: workNotes.trim(),
         },
       };
@@ -1907,6 +1943,9 @@ const getGroupedActivities = () => {
           <Text style={styles.savedDetailsHeader}>Work:</Text>
           <Text style={styles.savedDetailsText}>
             Project: {work.projectName || 'Not filled'}
+          </Text>
+          <Text style={styles.savedDetailsText}>
+            Candle Timer: {work.candleTime || '00:00:00'}
           </Text>
           <Text style={styles.savedDetailsText}>
             Notes: {work.notes || 'None'}
@@ -2593,19 +2632,74 @@ const getGroupedActivities = () => {
 
 {isWorkActivity(selectedActivity) && (
   <View style={styles.infoBox}>
-    <Text style={styles.savedDetailsHeader}>Work</Text>
+    <Text style={styles.savedDetailsHeader}>{isArabic ? 'العمل' : 'Work'}</Text>
 
     <TextInput
       style={styles.input}
-      placeholder="Project name"
+      placeholder={isArabic ? 'اسم المشروع' : 'Project name'}
       placeholderTextColor="#20242A"
       value={workProjectName}
       onChangeText={setWorkProjectName}
     />
 
+    <View style={styles.candleBox}>
+      <View style={styles.candleVisual}>
+        {studyCandleSeconds < STUDY_CANDLE_DURATION_SECONDS && (
+          <View style={[styles.candleFlame, isStudyCandleRunning && styles.candleFlameActive]}>
+            <View style={styles.candleFlameCore} />
+          </View>
+        )}
+        <View
+          style={[
+            styles.candleBody,
+            {
+              height: Math.max(
+                3,
+                82 * (1 - studyCandleSeconds / STUDY_CANDLE_DURATION_SECONDS)
+              ),
+            },
+          ]}
+        >
+          {studyCandleSeconds < STUDY_CANDLE_DURATION_SECONDS && (
+            <>
+              <View style={styles.candleWick} />
+              <View style={styles.candleWaxLip} />
+              <View style={styles.candleWaxDrip} />
+            </>
+          )}
+        </View>
+      </View>
+      <Text style={styles.candleTime}>{formatStudyCandleRemainingTime()}</Text>
+      <Text style={styles.candleHint}>
+        {isArabic ? 'تركيز للعمل لمدة ثلاث ساعات' : 'Three-hour work focus'}
+      </Text>
+      <View style={styles.candleProgressTrack}>
+        <View
+          style={[
+            styles.candleProgressFill,
+            { width: `${Math.min(100, (studyCandleSeconds / STUDY_CANDLE_DURATION_SECONDS) * 100)}%` },
+          ]}
+        />
+      </View>
+    </View>
+
+    <View style={styles.candleButtonRow}>
+      <TouchableOpacity style={styles.candleButton} onPress={startStudyCandle}>
+        <Text style={styles.smallActionText}>{isArabic ? 'بدء' : 'Start'}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.candleButton} onPress={pauseStudyCandle}>
+        <Text style={styles.smallActionText}>{isArabic ? 'إيقاف مؤقت' : 'Pause'}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.candleButton} onPress={stopStudyCandle}>
+        <Text style={styles.smallActionText}>{isArabic ? 'إيقاف' : 'Stop'}</Text>
+      </TouchableOpacity>
+    </View>
+
     <TextInput
       style={styles.input}
-      placeholder="Work notes"
+      placeholder={isArabic ? 'ملاحظات العمل' : 'Work notes'}
       placeholderTextColor="#20242A"
       value={workNotes}
       onChangeText={setWorkNotes}

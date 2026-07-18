@@ -98,6 +98,8 @@ export type StudyingDetails = {
 
 export type WorkDetails = {
   projectName?: string;
+  candleSeconds?: number;
+  candleTime?: string;
   notes?: string;
 };
 
@@ -121,6 +123,7 @@ export type PersonalInfoDetails = {
 };
 
 export type SessionDetails = {
+  historyNote?: string;
   teamOneName?: string;
   teamTwoName?: string;
   teamOneScore?: string;
