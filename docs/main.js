@@ -344,6 +344,7 @@ const timerDisplay = document.querySelector('#timer-display');
 const timerNote = document.querySelector('#timer-note');
 const startButton = document.querySelector('#start-button');
 const endButton = document.querySelector('#end-button');
+const timerCard = document.querySelector('#timer-card');
 const sessionForm = document.querySelector('#session-form');
 const activityFields = document.querySelector('#activity-fields');
 const sessionMessage = document.querySelector('#session-message');
@@ -575,7 +576,7 @@ function workText(key) {
     en: {
       title: 'Work Focus',
       projectName: 'Project name',
-      projectPlaceholder: 'Tafasili website',
+      projectPlaceholder: 'Client project',
       candleHours: 'Candle hours',
       candleMinutes: 'Candle minutes',
       candleHint: 'Set the work time, then start the candle.',
@@ -586,7 +587,7 @@ function workText(key) {
     ar: {
       title: 'تركيز العمل',
       projectName: 'اسم المشروع',
-      projectPlaceholder: 'موقع تفاصيلي',
+      projectPlaceholder: 'مشروع العميل',
       candleHours: 'ساعات الشمعة',
       candleMinutes: 'دقائق الشمعة',
       candleHint: 'حدد وقت العمل ثم ابدأ الشمعة.',
@@ -907,7 +908,7 @@ function reminderFields() {
   return fieldSection(labels.title, [
     inputField(labels.date, 'reminderDate', '2026-08-01', 'date'),
     inputField(labels.time, 'reminderTime', '18:30', 'time'),
-    textAreaField(labels.note, 'reminderNote', 'What should Tafasili remind you about?', true),
+    textAreaField(labels.note, 'reminderNote', 'Reminder details', true),
   ]);
 }
 
@@ -1142,18 +1143,10 @@ function openTracker(activity) {
   timerNote.textContent = text('timerNote');
   sessionMessage.textContent = '';
   trackerTitle.textContent = activityLabel(activity);
-  trackerHelper.textContent =
-    activity === 'Vehicle Maintenance'
-      ? text('trackerVehicle')
-      : activity === 'Personal Info'
-        ? text('trackerRecord')
-        : activity === 'Studying' || activity === 'Work'
-          ? state.language === 'ar'
-            ? 'حدد التفاصيل واستخدم مؤقت الشمعة ثم احفظ الجلسة.'
-            : 'Set the details, use the candle timer, then save the session.'
-      : text('trackerTimed');
+  trackerHelper.textContent = trackerHelperText(activity);
   trackerView.classList.toggle('vehicle-mode', isNonTimedActivity(activity));
   trackerView.classList.toggle('focus-mode', activity === 'Studying' || activity === 'Work');
+  timerCard.hidden = isNonTimedActivity(activity) || activity === 'Studying' || activity === 'Work';
   activityFields.innerHTML = getFieldsForActivity(activity);
   bindConditionalFields();
   if (activity === 'Studying' || activity === 'Work') {
@@ -1184,6 +1177,91 @@ function openTracker(activity) {
     renderBalootCalculator();
   }
   showView('tracker');
+}
+
+function trackerHelperText(activity) {
+  if (activity === 'Vehicle Maintenance') {
+    return text('trackerVehicle');
+  }
+
+  if (activity === 'Personal Info') {
+    return text('trackerRecord');
+  }
+
+  if (activity === 'Studying' || activity === 'Work') {
+    return state.language === 'ar'
+      ? 'حدد التفاصيل واستخدم مؤقت الشمعة ثم احفظ الجلسة.'
+      : 'Set the details, use the candle timer, then save the session.';
+  }
+
+  return text('trackerTimed');
+}
+
+function captureActivityFieldValues() {
+  const occurrences = {};
+
+  return Array.from(activityFields.querySelectorAll('[name]')).map((field) => {
+    const occurrence = occurrences[field.name] || 0;
+    occurrences[field.name] = occurrence + 1;
+
+    return {
+      name: field.name,
+      occurrence,
+      value: field.value,
+      checked: field.checked,
+    };
+  });
+}
+
+function restoreActivityFieldValues(savedFields) {
+  const occurrences = {};
+
+  activityFields.querySelectorAll('[name]').forEach((field) => {
+    const occurrence = occurrences[field.name] || 0;
+    occurrences[field.name] = occurrence + 1;
+    const savedField = savedFields.find(
+      (item) => item.name === field.name && item.occurrence === occurrence
+    );
+
+    if (!savedField) {
+      return;
+    }
+
+    field.value = savedField.value;
+    if (field.type === 'checkbox' || field.type === 'radio') {
+      field.checked = savedField.checked;
+    }
+  });
+}
+
+function refreshOpenTrackerLanguage() {
+  const activity = state.selectedActivity;
+
+  if (!activity || trackerView.classList.contains('hidden')) {
+    return;
+  }
+
+  const savedFields = captureActivityFieldValues();
+  trackerTitle.textContent = activityLabel(activity);
+  trackerHelper.textContent = trackerHelperText(activity);
+  activityFields.innerHTML = getFieldsForActivity(activity);
+  restoreActivityFieldValues(savedFields);
+  bindConditionalFields();
+
+  if (activity === 'Studying' || activity === 'Work') {
+    bindStudyCandle();
+    renderStudyCandle();
+  }
+
+  if (activity === 'Gym') {
+    bindGymWorkoutBuilder();
+    renderGymWorkoutBuilder();
+  }
+
+  if (activity === 'Baloot') {
+    bindBalootCalculator();
+    renderBalootCalculator();
+  }
 }
 
 function getMovementDistanceKm() {
@@ -3210,6 +3288,7 @@ languageButton.addEventListener('click', () => {
   state.language = state.language === 'en' ? 'ar' : 'en';
   localStorage.setItem(storageKeys.language, state.language);
   applyLanguage();
+  refreshOpenTrackerLanguage();
 });
 
 authForm.addEventListener('submit', async (event) => {

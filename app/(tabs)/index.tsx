@@ -3009,7 +3009,7 @@ const getGroupedActivities = () => {
               />
               <TextInput
                 style={styles.input}
-                placeholder="What should Tafasili remind you about?"
+                placeholder="Reminder details"
                 placeholderTextColor="#050505"
                 value={reminderNote}
                 onChangeText={setReminderNote}
