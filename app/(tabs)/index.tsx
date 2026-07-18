@@ -93,6 +93,30 @@ const arabicGroupNames: Record<string, string> = {
   'Custom Activities': 'أنشطة مخصصة',
 };
 
+const authErrorMessage = (error: unknown, isArabic: boolean, action: 'signin' | 'signup') => {
+  const message = error instanceof Error ? error.message.toLowerCase() : '';
+
+  if (message.includes('invalid login credentials')) {
+    return isArabic ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : 'Incorrect email or password.';
+  }
+
+  if (message.includes('email not confirmed')) {
+    return isArabic ? 'أكد بريدك الإلكتروني قبل تسجيل الدخول.' : 'Confirm your email before signing in.';
+  }
+
+  if (message.includes('rate limit') || message.includes('too many requests')) {
+    return isArabic ? 'تم إرسال طلبات كثيرة. انتظر قليلاً ثم حاول مرة أخرى.' : 'Too many requests. Wait a moment and try again.';
+  }
+
+  if (message.includes('network') || message.includes('fetch')) {
+    return isArabic ? 'تعذر الاتصال بالخادم. تحقق من الإنترنت.' : 'Could not reach the server. Check your internet connection.';
+  }
+
+  return action === 'signin'
+    ? isArabic ? 'تعذر تسجيل الدخول.' : 'Could not sign in.'
+    : isArabic ? 'تعذر إنشاء الحساب.' : 'Could not create account.';
+};
+
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -434,8 +458,8 @@ export default function HomeScreen() {
     }
 
     setIsLoggedIn(true);
-  } catch {
-    alert('Could not sign in. Check your email and password.');
+  } catch (error) {
+    alert(authErrorMessage(error, isArabic, 'signin'));
   }
 };
 const signup = async () => {
@@ -458,8 +482,18 @@ const signup = async () => {
     if (isSupabaseConfigured) {
       const result = await signUpWithSupabase(loginUsername.trim(), loginPassword);
 
+      if (result?.user?.identities?.length === 0) {
+        alert(isArabic
+          ? 'هذا الحساب موجود بالفعل. سجل الدخول أو أعد تعيين كلمة المرور.'
+          : 'This account already exists. Sign in or reset your password.');
+        setAuthMode('signin');
+        return;
+      }
+
       if (!result?.session || !result.user) {
-        alert('Account created. Check your email to confirm it, then sign in.');
+        alert(isArabic
+          ? 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني للتأكيد ثم سجل الدخول.'
+          : 'Account created. Check your email to confirm it, then sign in.');
         setAuthMode('signin');
         return;
       }
@@ -469,8 +503,8 @@ const signup = async () => {
     }
 
     setIsLoggedIn(true);
-  } catch {
-    alert('Could not create account. Use a valid email and try again.');
+  } catch (error) {
+    alert(authErrorMessage(error, isArabic, 'signup'));
   }
 };
 const logout = async () => {

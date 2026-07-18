@@ -290,6 +290,7 @@ const views = {
 
 const state = {
   authMode: 'signin',
+  passwordRecovery: false,
   currentView: 'auth',
   previousView: null,
   userId: null,
@@ -927,25 +928,34 @@ function getReminderDetails() {
 function setAuthMode(mode) {
   state.authMode = mode;
   const isSignup = mode === 'signup';
+  const isRecovery = mode === 'recovery';
 
-  authCard.classList.toggle('signup-mode', isSignup);
-  authTitle.textContent = isSignup ? text('createAccount') : text('welcomeBack');
-  authDescription.textContent = isSignup ? text('createProfile') : text('signInDescription');
-  authSubmit.textContent = isSignup ? text('signUp') : text('signIn');
+  authCard.classList.toggle('signup-mode', isSignup || isRecovery);
+  authTitle.textContent = isRecovery
+    ? state.language === 'ar' ? 'تعيين كلمة مرور جديدة' : 'Set a new password'
+    : isSignup ? text('createAccount') : text('welcomeBack');
+  authDescription.textContent = isRecovery
+    ? state.language === 'ar' ? 'أدخل كلمة المرور الجديدة وأكدها.' : 'Enter and confirm your new password.'
+    : isSignup ? text('createProfile') : text('signInDescription');
+  authSubmit.textContent = isRecovery
+    ? state.language === 'ar' ? 'تحديث كلمة المرور' : 'Update password'
+    : isSignup ? text('signUp') : text('signIn');
   document.querySelector('#identifier-label').textContent = isSignup ? text('signupIdentifier') : text('signinIdentifier');
   document.querySelector('#password-label').textContent = isSignup ? text('newPassword') : text('password');
   appleSignupButton.textContent = isSignup ? text('appleSignup') : text('appleSignin');
   facebookSignupButton.textContent = isSignup ? text('facebookSignup') : text('facebookSignin');
-  identifierInput.required = true;
+  identifierInput.required = !isRecovery;
   passwordInput.required = true;
-  repeatPasswordInput.required = isSignup;
-  repeatPasswordInput.closest('label').style.display = isSignup ? 'grid' : 'none';
+  repeatPasswordInput.required = isSignup || isRecovery;
+  repeatPasswordInput.closest('label').style.display = isSignup || isRecovery ? 'grid' : 'none';
+  identifierInput.closest('label').style.display = isRecovery ? 'none' : 'grid';
   passwordInput.closest('label').style.display = 'grid';
-  passwordInput.autocomplete = isSignup ? 'new-password' : 'current-password';
-  passkeyButton.style.display = 'inline-flex';
-  document.querySelector('.signup-divider').style.display = 'block';
-  document.querySelector('.signup-social').style.display = 'grid';
-  forgotButton.style.display = isSignup ? 'none' : 'inline-flex';
+  passwordInput.autocomplete = isSignup || isRecovery ? 'new-password' : 'current-password';
+  passkeyButton.style.display = isRecovery ? 'none' : 'inline-flex';
+  document.querySelector('.segmented').style.display = isRecovery ? 'none' : 'grid';
+  document.querySelector('.signup-divider').style.display = isRecovery ? 'none' : 'block';
+  document.querySelector('.signup-social').style.display = isRecovery ? 'none' : 'grid';
+  forgotButton.style.display = isSignup || isRecovery ? 'none' : 'inline-flex';
   forgotButton.textContent = text('forgot');
   authMessage.textContent = '';
 
@@ -3304,6 +3314,31 @@ authForm.addEventListener('submit', async (event) => {
       return;
     }
 
+    if (state.authMode === 'recovery') {
+      if (password.length < 8) {
+        authMessage.textContent = 'Use at least 8 characters for your password.';
+        return;
+      }
+
+      if (password !== repeatPassword) {
+        authMessage.textContent = 'Passwords do not match.';
+        return;
+      }
+
+      const { data, error } = await cloudClient.auth.updateUser({ password });
+
+      if (error || !data.user) {
+        throw error || new Error('Password update failed.');
+      }
+
+      state.passwordRecovery = false;
+      window.history.replaceState({}, document.title, window.location.pathname);
+      authForm.reset();
+      window.alert(state.language === 'ar' ? 'تم تحديث كلمة المرور.' : 'Password updated successfully.');
+      await completeCloudSignIn(data.user);
+      return;
+    }
+
     const credentials = identifier.includes('@')
       ? { email: identifier, password }
       : { phone: identifier, password };
@@ -3492,6 +3527,13 @@ async function initializeCloudAccount() {
 
   const { data, error } = await cloudClient.auth.getSession();
 
+  if (state.passwordRecovery || window.location.hash.includes('type=recovery')) {
+    state.passwordRecovery = true;
+    setAuthMode('recovery');
+    showView('auth', false);
+    return;
+  }
+
   if (error || !data.session?.user) {
     state.userId = null;
     sessionStorage.removeItem(storageKeys.activeSession);
@@ -3502,6 +3544,14 @@ async function initializeCloudAccount() {
   await completeCloudSignIn(data.session.user);
 }
 
-setAuthMode('signin');
+cloudClient?.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    state.passwordRecovery = true;
+    setAuthMode('recovery');
+    showView('auth', false);
+  }
+});
+
+setAuthMode(window.location.hash.includes('type=recovery') ? 'recovery' : 'signin');
 applyLanguage();
 void initializeCloudAccount();
