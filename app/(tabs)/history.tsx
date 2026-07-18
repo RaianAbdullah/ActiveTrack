@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   Alert,
@@ -18,6 +19,7 @@ import {
 } from '../../lib/sessionDatabase';
 
 export default function HistoryScreen() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [historyFilter, setHistoryFilter] = useState('All');
 
@@ -678,6 +680,11 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
+        <Ionicons name="arrow-back" size={20} color="#20242A" />
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
+
       <View style={styles.headerRow}>
         <Text style={styles.title}>History</Text>
 
@@ -849,7 +856,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 24,
   },
 
@@ -857,31 +864,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 16,
     marginBottom: 8,
   },
 
+  backButton: {
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    marginTop: 52,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  backButtonText: {
+    color: '#20242A',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
   title: {
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#20242A',
   },
 
   subtitle: {
-    fontSize: 18,
-    color: '#b8b8bb',
+    fontSize: 15,
+    color: '#20242A',
     marginBottom: 24,
   },
 
   clearButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     paddingVertical: 9,
     paddingHorizontal: 13,
     borderRadius: 10,
   },
 
   clearButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -891,15 +918,17 @@ const styles = StyleSheet.create({
   },
 
   progressBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 14,
     padding: 16,
     marginBottom: 18,
   },
 
   progressTitle: {
-    color: '#ffffff',
-    fontSize: 22,
+    color: '#20242A',
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
   },
@@ -912,30 +941,30 @@ const styles = StyleSheet.create({
 
   progressSummaryCard: {
     flex: 1,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     borderRadius: 10,
     padding: 12,
   },
 
   progressLabel: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 13,
     marginBottom: 5,
   },
 
   progressValue: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: 'bold',
   },
 
   progressMeta: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 13,
   },
 
   progressSectionTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -952,56 +981,58 @@ const styles = StyleSheet.create({
   },
 
   progressActivityName: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '600',
   },
 
   progressTrack: {
     height: 8,
-    backgroundColor: '#343437',
+    backgroundColor: '#E7E9EE',
     borderRadius: 4,
     overflow: 'hidden',
   },
 
   progressBar: {
     height: 8,
-    backgroundColor: '#d6d6d8',
+    backgroundColor: '#2563EB',
     borderRadius: 4,
   },
 
   filterButton: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 20,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#3a3a3d',
+    borderColor: '#E7E9EE',
   },
 
   filterButtonActive: {
-    backgroundColor: '#4a4a4d',
-    borderColor: '#4a4a4d',
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
 
   filterText: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '600',
   },
 
   filterTextActive: {
-    color: '#ffffff',
+    color: '#FFFFFF',
   },
 
   emptyText: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
   },
 
   card: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 16,
     borderRadius: 14,
     marginBottom: 14,
@@ -1015,26 +1046,26 @@ const styles = StyleSheet.create({
   },
 
   badge: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: '#2563EB',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
   },
 
   badgeText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
 
   dateText: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '600',
   },
 
   durationText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -1043,33 +1074,33 @@ const styles = StyleSheet.create({
   timeBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 12,
     borderRadius: 10,
   },
 
   timeText: {
-    color: '#d6d6d8',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '600',
   },
 
   detailsBox: {
     marginTop: 10,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 12,
     borderRadius: 10,
   },
 
   detailsTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
 
   detailsSectionTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
@@ -1077,7 +1108,7 @@ const styles = StyleSheet.create({
   },
 
   detailsText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 4,
   },
@@ -1087,21 +1118,21 @@ const styles = StyleSheet.create({
   },
 
   setText: {
-    color: '#d6d6d8',
+    color: '#20242A',
     fontSize: 15,
     marginLeft: 12,
     marginBottom: 3,
   },
 
   deleteButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     padding: 12,
     borderRadius: 10,
     marginTop: 14,
   },
 
   deleteButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',

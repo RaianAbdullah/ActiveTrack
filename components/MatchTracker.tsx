@@ -164,7 +164,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 1 name"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.matchTeamOneName}
         onChangeText={props.setMatchTeamOneName}
       />
@@ -172,7 +172,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 2 name"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.matchTeamTwoName}
         onChangeText={props.setMatchTeamTwoName}
       />
@@ -182,7 +182,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Set number"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.matchSetNumber}
         onChangeText={props.setMatchSetNumber}
         keyboardType="number-pad"
@@ -192,7 +192,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 games"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamOneGames}
           onChangeText={props.setMatchTeamOneGames}
           keyboardType="number-pad"
@@ -201,7 +201,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 games"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamTwoGames}
           onChangeText={props.setMatchTeamTwoGames}
           keyboardType="number-pad"
@@ -214,7 +214,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 points"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamOnePoints}
           onChangeText={props.setMatchTeamOnePoints}
         />
@@ -222,7 +222,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 points"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamTwoPoints}
           onChangeText={props.setMatchTeamTwoPoints}
         />
@@ -248,7 +248,7 @@ export default function MatchTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Tiebreak score, example: 7-5"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.matchTiebreakScore}
         onChangeText={props.setMatchTiebreakScore}
       />
@@ -259,7 +259,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 winners"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamOneWinners}
           onChangeText={props.setMatchTeamOneWinners}
           keyboardType="number-pad"
@@ -268,7 +268,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 winners"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamTwoWinners}
           onChangeText={props.setMatchTeamTwoWinners}
           keyboardType="number-pad"
@@ -279,7 +279,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 errors"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamOneErrors}
           onChangeText={props.setMatchTeamOneErrors}
           keyboardType="number-pad"
@@ -288,7 +288,7 @@ export default function MatchTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 errors"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.matchTeamTwoErrors}
           onChangeText={props.setMatchTeamTwoErrors}
           keyboardType="number-pad"
@@ -354,30 +354,34 @@ export default function MatchTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
   },
   detailsTitle: {
-    color: '#ffffff',
-    fontSize: 24,
+    color: '#20242A',
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 14,
   },
   detailsSubtitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 12,
     marginTop: 6,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 18,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   scoreRow: {
     flexDirection: 'row',
@@ -385,29 +389,31 @@ const styles = StyleSheet.create({
   },
   scoreInput: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   addExerciseButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   exerciseListBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 14,
     borderRadius: 12,
     marginTop: 4,
     marginBottom: 12,
   },
   exerciseListTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -416,7 +422,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#3a3a3d',
+    borderBottomColor: '#E7E9EE',
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
@@ -424,34 +430,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   exerciseName: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: '700',
     marginBottom: 4,
   },
   exerciseDetails: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 14,
     marginBottom: 2,
   },
   serverButton: {
     flex: 1,
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#E7E9EE',
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
   },
   selectedServerButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#DDE7FC',
+    borderWidth: 1,
+    borderColor: '#2563EB',
   },
   serverButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
   },
   exerciseDeleteButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -460,33 +468,33 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   exerciseDeleteText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontWeight: 'bold',
     fontSize: 15,
   },
   matchTotalBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 14,
     borderRadius: 12,
     marginTop: 8,
   },
   matchTotalTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   matchTotalText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     marginBottom: 4,
   },
   emptyHistory: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
   },
   buttonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',

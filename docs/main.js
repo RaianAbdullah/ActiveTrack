@@ -70,7 +70,7 @@ const translations = {
     back: 'Back',
     logout: 'Logout',
     authEyebrow: 'Personal activity tracking',
-    heroTitle: 'Track and save your activity sessions.\nتتبع واحفظ جلسات نشاطك.',
+    heroTitle: 'Track and save your activity sessions.',
     heroCopy:
       'Your Tafasili account securely saves activity history to the cloud, while keeping an offline copy on this device.',
     signIn: 'Sign in',
@@ -166,7 +166,7 @@ const translations = {
     back: 'رجوع',
     logout: 'تسجيل الخروج',
     authEyebrow: 'تتبع النشاطات الشخصية',
-    heroTitle: 'تتبع واحفظ جلسات نشاطك.\nTrack and save your activity sessions.',
+    heroTitle: 'تتبع واحفظ جلسات نشاطك.',
     heroCopy:
       'يحفظ حساب تفاصيلي سجل نشاطاتك بأمان في السحابة، مع نسخة محلية على هذا الجهاز.',
     signIn: 'تسجيل الدخول',
@@ -607,7 +607,11 @@ function escapeHtml(value) {
 
 function applyLanguage() {
   document.documentElement.lang = state.language;
-  document.documentElement.dir = state.language === 'ar' ? 'rtl' : 'ltr';
+  // Keep the viewport anchored left-to-right and apply RTL inside the page.
+  // Setting RTL on <html> can shift wide grids outside the visible viewport.
+  document.documentElement.dir = 'ltr';
+  document.body.dir = 'ltr';
+  document.body.classList.toggle('rtl', state.language === 'ar');
   languageButton.textContent = text('languageButton');
   backButton.textContent = text('back');
   logoutButton.textContent = text('logout');
@@ -1065,46 +1069,36 @@ function renderHome() {
 
   customActivityForm.classList.toggle('collapsed', state.selectedCategory !== 'custom');
 
-  if (!state.selectedCategory) {
-    const categories = [
-      ...activitySections.map((section) => ({
-        key: section.key,
-        count: section.activities.length,
-      })),
-      { key: 'custom', count: state.customActivities.length },
-    ];
+  const categories = [
+    ...activitySections.map((section) => ({
+      key: section.key,
+      count: section.activities.length,
+    })),
+    { key: 'custom', count: state.customActivities.length },
+  ];
+  const selectedSection = activitySections.find((section) => section.key === state.selectedCategory);
+  const selectedActivities = state.selectedCategory === 'custom'
+    ? state.customActivities
+    : selectedSection?.activities || [];
 
-    activityGrid.innerHTML = `
-      <section class="activity-section">
-        <h2>${state.language === 'ar' ? 'أنواع الأنشطة' : 'Activity types'}</h2>
-        <div class="activity-section-grid category-grid">
-          ${categories
-            .map(
-              (category) => `
-                <button class="activity-card category-card" type="button" data-category="${category.key}">
-                  <strong>${translations[state.language].sections[category.key]}</strong>
-                  <span>${category.count} ${state.language === 'ar' ? 'أنشطة' : category.count === 1 ? 'activity' : 'activities'}</span>
-                  <b aria-hidden="true">›</b>
-                </button>
-              `
-            )
-            .join('')}
-        </div>
-      </section>
-    `;
-  } else {
-    const selectedSection = activitySections.find((section) => section.key === state.selectedCategory);
-    const selectedActivities = state.selectedCategory === 'custom'
-      ? state.customActivities
-      : selectedSection?.activities || [];
-
-    activityGrid.innerHTML = `
-      <button class="category-back" type="button" data-category-back>
-        ${state.language === 'ar' ? '→ أنواع الأنشطة' : '← Activity types'}
-      </button>
-      ${renderActivitySection(state.selectedCategory, selectedActivities)}
-    `;
-  }
+  activityGrid.innerHTML = `
+    <section class="activity-section">
+      <h2>${state.language === 'ar' ? 'أنواع الأنشطة' : 'Activity types'}</h2>
+      <div class="activity-section-grid category-grid">
+        ${categories
+          .map(
+            (category) => `
+              <button class="activity-card category-card${state.selectedCategory === category.key ? ' active' : ''}" type="button" data-category="${category.key}">
+                <strong>${translations[state.language].sections[category.key]}</strong>
+                <span>${category.count} ${state.language === 'ar' ? category.count === 1 ? 'نشاط' : 'أنشطة' : category.count === 1 ? 'activity' : 'activities'}</span>
+              </button>
+            `
+          )
+          .join('')}
+      </div>
+    </section>
+    ${state.selectedCategory ? renderActivitySection(state.selectedCategory, selectedActivities) : ''}
+  `;
 }
 
 function renderActivitySection(sectionKey, activities) {
@@ -1623,20 +1617,71 @@ function fieldGrid(fields) {
   return `<div class="field-grid">${fields.join('')}</div>`;
 }
 
+const arabicFieldLabels = {
+  'Balls hit': 'عدد الكرات',
+  Club: 'العصا',
+  Cost: 'التكلفة',
+  'Elevation gain': 'الارتفاع المكتسب',
+  Goal: 'الهدف',
+  'Insurance expiration date': 'تاريخ انتهاء التأمين',
+  'Lap distance': 'مسافة اللفة',
+  Laps: 'اللفات',
+  Mileage: 'عداد المسافة',
+  'Model / Year': 'الموديل / السنة',
+  'Next service date': 'تاريخ الصيانة القادمة',
+  'Next service mileage': 'عداد الصيانة القادمة',
+  Notes: 'ملاحظات',
+  'Personal record': 'الرقم القياسي الشخصي',
+  'Plate number': 'رقم اللوحة',
+  'Range name': 'اسم ميدان التدريب',
+  'Registration end date': 'تاريخ انتهاء الاستمارة',
+  'Reminder date': 'تاريخ التذكير',
+  'Reminder note': 'ملاحظة التذكير',
+  'Reminder time': 'وقت التذكير',
+  'Rounds notes': 'ملاحظات الجولات',
+  'Route name': 'اسم المسار',
+  Server: 'المرسل',
+  'Service date': 'تاريخ الصيانة',
+  'Session title': 'عنوان الجلسة',
+  'Set number': 'رقم المجموعة',
+  'Shop / place name': 'اسم المحل / المكان',
+  Splits: 'تقسيمات الوقت',
+  'Team 1': 'الفريق الأول',
+  'Team 1 errors': 'أخطاء الفريق الأول',
+  'Team 1 games': 'أشواط الفريق الأول',
+  'Team 1 points': 'نقاط الفريق الأول',
+  'Team 1 score': 'نتيجة الفريق الأول',
+  'Team 1 winners': 'ضربات الفوز للفريق الأول',
+  'Team 2': 'الفريق الثاني',
+  'Team 2 errors': 'أخطاء الفريق الثاني',
+  'Team 2 games': 'أشواط الفريق الثاني',
+  'Team 2 points': 'نقاط الفريق الثاني',
+  'Team 2 score': 'نتيجة الفريق الثاني',
+  'Team 2 winners': 'ضربات الفوز للفريق الثاني',
+  'Tiebreak score': 'نتيجة كسر التعادل',
+  'Vehicle name': 'اسم المركبة',
+  Winner: 'الفائز',
+};
+
+function localizedFieldLabel(label) {
+  return state.language === 'ar' ? arabicFieldLabels[label] || label : label;
+}
+
 function fieldSection(title, fields) {
   return `
     <section class="field-section">
-      <h2>${title}</h2>
+      <h2>${localizedFieldLabel(title)}</h2>
       <div class="field-grid">${fields.join('')}</div>
     </section>
   `;
 }
 
 function inputField(label, name, placeholder, type = 'text') {
+  const displayLabel = localizedFieldLabel(label);
   return `
     <label>
-      ${label}
-      <input name="${name}" type="${type}" placeholder="${placeholder}" />
+      ${displayLabel}
+      <input name="${name}" type="${type}" placeholder="${state.language === 'ar' ? displayLabel : placeholder}" />
     </label>
   `;
 }
@@ -1645,7 +1690,7 @@ function checkboxField(label, name, controls = '') {
   return `
     <label class="checkbox-field">
       <input name="${name}" type="checkbox" value="true" ${controls ? `data-controls="${controls}"` : ''} />
-      <span>${label}</span>
+      <span>${localizedFieldLabel(label)}</span>
     </label>
   `;
 }
@@ -2238,9 +2283,10 @@ function renderBalootCalculator() {
 }
 
 function selectField(label, name, options) {
+  const displayLabel = localizedFieldLabel(label);
   return `
     <label>
-      ${label}
+      ${displayLabel}
       <select name="${name}">
         ${options.map((option) => `<option>${option}</option>`).join('')}
       </select>
@@ -2249,10 +2295,11 @@ function selectField(label, name, options) {
 }
 
 function textAreaField(label, name, placeholder, full = false) {
+  const displayLabel = localizedFieldLabel(label);
   return `
     <label class="${full ? 'full' : ''}">
-      ${label}
-      <textarea name="${name}" placeholder="${placeholder}"></textarea>
+      ${displayLabel}
+      <textarea name="${name}" placeholder="${state.language === 'ar' ? displayLabel : placeholder}"></textarea>
     </label>
   `;
 }
@@ -3095,7 +3142,6 @@ document.addEventListener('click', (event) => {
   const viewButton = event.target.closest('[data-view]');
   const activityButton = event.target.closest('[data-activity]');
   const categoryButton = event.target.closest('[data-category]');
-  const categoryBackButton = event.target.closest('[data-category-back]');
   const deleteButton = event.target.closest('[data-delete-session]');
 
   if (viewButton) {
@@ -3109,11 +3155,6 @@ document.addEventListener('click', (event) => {
 
   if (categoryButton) {
     state.selectedCategory = categoryButton.dataset.category;
-    renderHome();
-  }
-
-  if (categoryBackButton) {
-    state.selectedCategory = null;
     renderHome();
   }
 

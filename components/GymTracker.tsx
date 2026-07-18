@@ -183,7 +183,7 @@ export default function GymTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Exercise name, example: Bench Press"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.gymExerciseName}
         onChangeText={props.setGymExerciseName}
       />
@@ -192,7 +192,7 @@ export default function GymTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Weight"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.gymSetWeight}
           onChangeText={props.setGymSetWeight}
           keyboardType="decimal-pad"
@@ -201,7 +201,7 @@ export default function GymTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Set reps"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.gymSetReps}
           onChangeText={props.setGymSetReps}
           keyboardType="number-pad"
@@ -320,30 +320,34 @@ export default function GymTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
   },
   detailsTitle: {
-    color: '#ffffff',
-    fontSize: 24,
+    color: '#20242A',
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 14,
   },
   detailsSubtitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 12,
     marginTop: 6,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 18,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   workoutGrid: {
     flexDirection: 'row',
@@ -352,21 +356,21 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   workoutButton: {
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#E7E9EE',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 10,
   },
   selectedWorkoutButton: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: '#2563EB',
   },
   workoutButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 15,
     fontWeight: '600',
   },
   selectedWorkoutButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontWeight: '800',
   },
   scoreRow: {
@@ -375,15 +379,17 @@ const styles = StyleSheet.create({
   },
   scoreInput: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   addSetButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#2563EB',
     borderRadius: 12,
     paddingHorizontal: 18,
     height: 54,
@@ -391,24 +397,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addSetText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
   },
   restTimerBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
   },
   restTimerTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   restTimerValue: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 34,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -419,31 +425,33 @@ const styles = StyleSheet.create({
   },
   restButton: {
     flex: 1,
-    backgroundColor: '#2c2c2f',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 10,
     padding: 10,
   },
   restButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     textAlign: 'center',
     fontWeight: '700',
   },
   addExerciseButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   exerciseListBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 14,
     borderRadius: 12,
     marginTop: 4,
     marginBottom: 12,
   },
   exerciseListTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -452,7 +460,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#3a3a3d',
+    borderBottomColor: '#E7E9EE',
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
@@ -460,18 +468,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   exerciseName: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: '700',
     marginBottom: 4,
   },
   exerciseDetails: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 15,
     marginBottom: 2,
   },
   exerciseDeleteButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -480,16 +488,16 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   exerciseDeleteText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontWeight: 'bold',
     fontSize: 15,
   },
   emptyHistory: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
   },
   buttonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',

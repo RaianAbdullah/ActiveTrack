@@ -34,7 +34,7 @@ export default function FootballTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 1 name"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.footballTeamOneName}
         onChangeText={props.setFootballTeamOneName}
       />
@@ -42,7 +42,7 @@ export default function FootballTracker(props: Props) {
       <TextInput
         style={styles.input}
         placeholder="Team 2 name"
-        placeholderTextColor="#8f8f92"
+        placeholderTextColor="#20242A"
         value={props.footballTeamTwoName}
         onChangeText={props.setFootballTeamTwoName}
       />
@@ -51,7 +51,7 @@ export default function FootballTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 1 score"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.footballTeamOneScore}
           onChangeText={props.setFootballTeamOneScore}
           keyboardType="number-pad"
@@ -60,7 +60,7 @@ export default function FootballTracker(props: Props) {
         <TextInput
           style={styles.scoreInput}
           placeholder="Team 2 score"
-          placeholderTextColor="#8f8f92"
+          placeholderTextColor="#20242A"
           value={props.footballTeamTwoScore}
           onChangeText={props.setFootballTeamTwoScore}
           keyboardType="number-pad"
@@ -72,24 +72,28 @@ export default function FootballTracker(props: Props) {
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
   },
   detailsTitle: {
-    color: '#ffffff',
-    fontSize: 24,
+    color: '#20242A',
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 14,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 18,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   scoreRow: {
     flexDirection: 'row',
@@ -97,11 +101,13 @@ const styles = StyleSheet.create({
   },
   scoreInput: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
 });

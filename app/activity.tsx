@@ -169,7 +169,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Example: Boxing"
-              placeholderTextColor="#8f8f92"
+              placeholderTextColor="#20242A"
               value={otherActivityName}
               onChangeText={setOtherActivityName}
             />
@@ -194,32 +194,40 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
   },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
   },
   backButton: {
     marginTop: 55,
     marginBottom: 20,
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
   },
   backButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#20242A',
     marginTop: 60,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#b8b8bb',
+    fontSize: 15,
+    color: '#20242A',
     marginBottom: 24,
   },
   activityList: {
@@ -227,59 +235,69 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   activityButton: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 14,
   },
   otherButton: {
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#E7E9EE',
   },
   activityText: {
-    color: '#ffffff',
-    fontSize: 20,
+    color: '#20242A',
+    fontSize: 16,
     fontWeight: '600',
   },
   startButton: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: '#E7E9EE',
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
     padding: 18,
     borderRadius: 14,
     marginBottom: 14,
   },
   endButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
     padding: 18,
     borderRadius: 14,
     marginBottom: 24,
   },
   saveButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#E7E9EE',
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
     padding: 18,
     borderRadius: 14,
     marginTop: 24,
   },
   cancelButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
   },
   buttonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
   },
   infoBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 14,
   },
   infoText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     marginBottom: 10,
   },
   durationText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 8,
@@ -291,27 +309,31 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 18,
     padding: 24,
   },
   modalTitle: {
-    color: '#ffffff',
-    fontSize: 28,
+    color: '#20242A',
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   modalSubtitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 18,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 18,
     marginBottom: 18,
-    color: '#000000',
+    color: '#20242A',
   },
 });

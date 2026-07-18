@@ -3,6 +3,7 @@ import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -65,10 +66,37 @@ const lapActivities = ['Run', 'Walking', 'Cycling', 'Swimming'];
 const movementActivities = ['Run', 'Walking', 'Cycling'];
 const matchActivities = ['Padel', 'Tennis'];
 const STUDY_CANDLE_DURATION_SECONDS = 3 * 60 * 60;
+const arabicActivityNames: Record<string, string> = {
+  Football: 'كرة القدم',
+  Gym: 'النادي',
+  Run: 'الجري',
+  Padel: 'بادل',
+  Tennis: 'تنس',
+  Golf: 'جولف',
+  'Horse Riding': 'ركوب الخيل',
+  Cycling: 'الدراجات',
+  Walking: 'المشي',
+  Swimming: 'السباحة',
+  Studying: 'الدراسة',
+  Work: 'العمل',
+  Baloot: 'بلوت',
+  'Vehicle Maintenance': 'صيانة المركبة',
+  'Personal Info': 'المعلومات الشخصية',
+};
+const arabicGroupNames: Record<string, string> = {
+  'Sports and Games': 'الرياضات والألعاب',
+  'Fitness and Movement': 'اللياقة والحركة',
+  'Horse Activities': 'أنشطة الخيل',
+  'Study and Work': 'الدراسة والعمل',
+  'Life Tracking': 'تتبع الحياة',
+  'Vehicle and Maintenance': 'المركبات والصيانة',
+  'Custom Activities': 'أنشطة مخصصة',
+};
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const [isAuthLoading, setIsAuthLoading] = useState(isSupabaseConfigured);
   const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -258,11 +286,19 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
+    void AsyncStorage.getItem('language').then((savedLanguage) => {
+      if (savedLanguage === 'ar' || savedLanguage === 'en') {
+        setLanguage(savedLanguage);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     navigation.setOptions({
       tabBarStyle: isLoggedIn
         ? {
-            backgroundColor: '#0f0f10',
-            borderTopColor: '#1f1f22',
+            backgroundColor: '#FFFFFF',
+            borderTopColor: '#E7E9EE',
             borderTopWidth: 1,
             height: 85,
             paddingTop: 8,
@@ -271,6 +307,29 @@ export default function HomeScreen() {
         : { display: 'none' },
     });
   }, [isLoggedIn, navigation]);
+
+  const isArabic = language === 'ar';
+  const toggleLanguage = async () => {
+    const nextLanguage = isArabic ? 'en' : 'ar';
+    setLanguage(nextLanguage);
+    await AsyncStorage.setItem('language', nextLanguage);
+  };
+  const activityDisplayName = (activity: string) =>
+    isArabic ? arabicActivityNames[activity] ?? activity : activity;
+  const groupDisplayName = (groupName: string) =>
+    isArabic ? arabicGroupNames[groupName] ?? groupName : groupName;
+  const renderBrand = () => (
+    <View style={[styles.brandLockup, isArabic && styles.brandLockupRtl]}>
+      <Image
+        source={require('../../assets/images/tafasili-logo.png')}
+        style={styles.brandLogo}
+        resizeMode="contain"
+      />
+      <View>
+        <Text style={styles.brandEnglish}>Tafasili</Text>
+      </View>
+    </View>
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -2083,8 +2142,10 @@ const getGroupedActivities = () => {
     return (
       <GestureHandlerRootView style={styles.root}>
         <View style={styles.loginContainer}>
-          <Text style={styles.loginTitle}>Tafasili</Text>
-          <Text style={styles.loginSubtitle}>Restoring your secure account...</Text>
+          {renderBrand()}
+          <Text style={[styles.loginSubtitle, isArabic && styles.rtlText]}>
+            {isArabic ? 'جارٍ استعادة حسابك الآمن...' : 'Restoring your secure account...'}
+          </Text>
         </View>
       </GestureHandlerRootView>
     );
@@ -2096,12 +2157,20 @@ const getGroupedActivities = () => {
     return (
     <GestureHandlerRootView style={styles.root}>
       <ScrollView contentContainerStyle={styles.loginContainer}>
-        <Text style={styles.loginTitle}>Tafasili</Text>
-        <Text style={styles.loginTagline}>
-          Track and save your activity sessions.{'\n'}تتبع واحفظ جلسات نشاطك.
+        <View style={styles.authTopbar}>
+          <View style={styles.topbarSpacer} />
+          {renderBrand()}
+          <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+            <Text style={styles.languageButtonText}>{isArabic ? 'English' : 'العربية'}</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={[styles.loginTagline, isArabic && styles.rtlText]}>
+          {isArabic ? 'تتبع واحفظ تفاصيل حياتك ونشاطاتك.' : 'Track and save your life and activity details.'}
         </Text>
-        <Text style={styles.loginSubtitle}>
-          {isSignupMode ? 'Create your account' : 'Sign in to track your activities'}
+        <Text style={[styles.loginSubtitle, isArabic && styles.rtlText]}>
+          {isSignupMode
+            ? isArabic ? 'أنشئ حسابك' : 'Create your account'
+            : isArabic ? 'سجل الدخول لمتابعة نشاطاتك' : 'Sign in to track your activities'}
         </Text>
 
         <View style={styles.authModeRow}>
@@ -2112,7 +2181,7 @@ const getGroupedActivities = () => {
             ]}
             onPress={() => setAuthMode('signin')}
           >
-            <Text style={styles.authModeText}>Sign In</Text>
+            <Text style={styles.authModeText}>{isArabic ? 'تسجيل الدخول' : 'Sign In'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -2122,22 +2191,24 @@ const getGroupedActivities = () => {
             ]}
             onPress={() => setAuthMode('signup')}
           >
-            <Text style={styles.authModeText}>Sign Up</Text>
+            <Text style={styles.authModeText}>{isArabic ? 'إنشاء حساب' : 'Sign Up'}</Text>
           </TouchableOpacity>
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#8f8f92"
+          placeholder={isArabic ? 'البريد الإلكتروني' : 'Email'}
+          placeholderTextColor="#20242A"
           value={loginUsername}
           onChangeText={setLoginUsername}
         />
 
         <TextInput
           style={styles.input}
-          placeholder={isSignupMode ? 'New password' : 'Password'}
-          placeholderTextColor="#8f8f92"
+          placeholder={isSignupMode
+            ? isArabic ? 'كلمة مرور جديدة' : 'New password'
+            : isArabic ? 'كلمة المرور' : 'Password'}
+          placeholderTextColor="#20242A"
           value={loginPassword}
           onChangeText={setLoginPassword}
           secureTextEntry
@@ -2147,25 +2218,27 @@ const getGroupedActivities = () => {
           <>
             <TextInput
               style={styles.input}
-              placeholder="Confirm password"
-              placeholderTextColor="#8f8f92"
+              placeholder={isArabic ? 'تأكيد كلمة المرور' : 'Confirm password'}
+              placeholderTextColor="#20242A"
               value={signupRepeatPassword}
               onChangeText={setSignupRepeatPassword}
               secureTextEntry
             />
 
             <Text style={styles.signupHelp}>
-              Password must be at least 8 characters.
+              {isArabic ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.' : 'Password must be at least 8 characters.'}
             </Text>
           </>
         )}
 
         <TouchableOpacity
-          style={styles.startButton}
+          style={[styles.startButton, styles.authSubmitButton]}
           onPress={isSignupMode ? signup : login}
         >
-          <Text style={styles.buttonText}>
-            {isSignupMode ? 'Sign Up' : 'Sign In'}
+          <Text style={styles.authSubmitText}>
+            {isSignupMode
+              ? isArabic ? 'إنشاء حساب' : 'Sign Up'
+              : isArabic ? 'تسجيل الدخول' : 'Sign In'}
           </Text>
         </TouchableOpacity>
 
@@ -2173,10 +2246,12 @@ const getGroupedActivities = () => {
           style={styles.secondaryAuthButton}
           onPress={() => alert('Face ID / passkey can be connected later')}
         >
-          <Text style={styles.secondaryAuthButtonText}>Face ID / Passkey</Text>
+          <Text style={styles.secondaryAuthButtonText}>
+            {isArabic ? 'Face ID / مفتاح المرور' : 'Face ID / Passkey'}
+          </Text>
         </TouchableOpacity>
 
-        <Text style={styles.signupDivider}>Or</Text>
+        <Text style={styles.signupDivider}>{isArabic ? 'أو' : 'Or'}</Text>
 
         <TouchableOpacity
           style={styles.socialButton}
@@ -2185,7 +2260,9 @@ const getGroupedActivities = () => {
           }
         >
           <Text style={styles.socialButtonText}>
-            {isSignupMode ? 'Sign up with Apple' : 'Log in with Apple'}
+            {isSignupMode
+              ? isArabic ? 'إنشاء حساب باستخدام Apple' : 'Sign up with Apple'
+              : isArabic ? 'تسجيل الدخول باستخدام Apple' : 'Log in with Apple'}
           </Text>
         </TouchableOpacity>
 
@@ -2196,7 +2273,9 @@ const getGroupedActivities = () => {
           }
         >
           <Text style={styles.socialButtonText}>
-            {isSignupMode ? 'Sign up with Facebook' : 'Log in with Facebook'}
+            {isSignupMode
+              ? isArabic ? 'إنشاء حساب باستخدام Facebook' : 'Sign up with Facebook'
+              : isArabic ? 'تسجيل الدخول باستخدام Facebook' : 'Log in with Facebook'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -2208,14 +2287,18 @@ const getGroupedActivities = () => {
       <GestureHandlerRootView style={styles.root}>
         <ScrollView style={styles.container}>
           <TouchableOpacity style={styles.backButton} onPress={goBackToList}>
-            <Text style={styles.backButtonText}>← Back</Text>
+            <Text style={styles.backButtonText}>{isArabic ? 'رجوع →' : '← Back'}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.title}>{selectedActivity}</Text>
-          <Text style={styles.subtitle}>Track your activity session</Text>
+          <Text style={[styles.title, isArabic && styles.rtlText]}>
+            {activityDisplayName(selectedActivity)}
+          </Text>
+          <Text style={[styles.subtitle, isArabic && styles.rtlText]}>
+            {isArabic ? 'سجل تفاصيل نشاطك' : 'Track your activity session'}
+          </Text>
           {!isNonTimedActivity(selectedActivity) && (
-          <TouchableOpacity style={styles.startButton} onPress={startActivity}>
-          <Text style={styles.buttonText}>Start Activity</Text>
+          <TouchableOpacity style={[styles.startButton, styles.timerActionButton]} onPress={startActivity}>
+          <Text style={styles.timerActionText}>{isArabic ? 'بدء النشاط' : 'Start Activity'}</Text>
         </TouchableOpacity>
 )}
 
@@ -2228,7 +2311,7 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="ID number"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={personalIdNumber}
                 onChangeText={setPersonalIdNumber}
                 secureTextEntry
@@ -2236,21 +2319,21 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="ID expiration date"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={personalIdExpirationDate}
                 onChangeText={setPersonalIdExpirationDate}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Driving license expiration date"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={personalDlExpirationDate}
                 onChangeText={setPersonalDlExpirationDate}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Passport number"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={personalPassportNumber}
                 onChangeText={setPersonalPassportNumber}
                 secureTextEntry
@@ -2259,7 +2342,7 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Passport expiration date"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={personalPassportExpirationDate}
                 onChangeText={setPersonalPassportExpirationDate}
               />
@@ -2274,7 +2357,7 @@ const getGroupedActivities = () => {
                   key={field}
                   style={styles.input}
                   placeholder={field}
-                  placeholderTextColor="#8f8f92"
+                  placeholderTextColor="#20242A"
                   value={customFieldValues[field] || ''}
                   onChangeText={(value) =>
                     setCustomFieldValues((currentValues) => ({
@@ -2390,7 +2473,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Subject, example: Math"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studySubject}
       onChangeText={setStudySubject}
     />
@@ -2398,7 +2481,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Study type, example: Exam, coursework, review"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyType}
       onChangeText={setStudyType}
     />
@@ -2406,7 +2489,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Exam date, example: 20/08/2026"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyExamDate}
       onChangeText={setStudyExamDate}
     />
@@ -2414,7 +2497,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Coursework, example: Chapter 4 assignment"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyCoursework}
       onChangeText={setStudyCoursework}
     />
@@ -2422,7 +2505,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Pomodoro plan, example: 25/5 x 4"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyPomodoroPlan}
       onChangeText={setStudyPomodoroPlan}
     />
@@ -2430,7 +2513,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Study streak, example: 5 days"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyStreak}
       onChangeText={setStudyStreak}
     />
@@ -2438,7 +2521,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Total study hours"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyTotalHours}
       onChangeText={setStudyTotalHours}
       keyboardType="decimal-pad"
@@ -2500,7 +2583,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Study notes"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={studyNotes}
       onChangeText={setStudyNotes}
       multiline
@@ -2515,7 +2598,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Project name"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={workProjectName}
       onChangeText={setWorkProjectName}
     />
@@ -2523,7 +2606,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Work notes"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={workNotes}
       onChangeText={setWorkNotes}
       multiline
@@ -2623,7 +2706,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Vehicle name, example: Indian Motorcycle"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleName}
       onChangeText={setVehicleName}
     />
@@ -2631,7 +2714,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Plate number"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehiclePlateNumber}
       onChangeText={setVehiclePlateNumber}
     />
@@ -2639,7 +2722,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Model / Year, example: Camry 2022"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleModelYear}
       onChangeText={setVehicleModelYear}
     />
@@ -2662,7 +2745,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Service date, example: 2026-07-17"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleServiceDate}
       onChangeText={setVehicleServiceDate}
     />
@@ -2670,7 +2753,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Mileage / KM"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleMileage}
       onChangeText={setVehicleMileage}
       keyboardType="numeric"
@@ -2679,7 +2762,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Cost"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleCost}
       onChangeText={setVehicleCost}
       keyboardType="numeric"
@@ -2688,7 +2771,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Shop / place name"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleShopName}
       onChangeText={setVehicleShopName}
     />
@@ -2698,7 +2781,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Next service date"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleNextServiceDate}
       onChangeText={setVehicleNextServiceDate}
     />
@@ -2706,7 +2789,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Next service mileage / KM"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleNextServiceMileage}
       onChangeText={setVehicleNextServiceMileage}
       keyboardType="numeric"
@@ -2715,7 +2798,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Insurance expiration date"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleInsuranceExpirationDate}
       onChangeText={setVehicleInsuranceExpirationDate}
     />
@@ -2723,7 +2806,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Registration end date"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleRegistrationEndDate}
       onChangeText={setVehicleRegistrationEndDate}
     />
@@ -2731,7 +2814,7 @@ const getGroupedActivities = () => {
     <TextInput
       style={styles.input}
       placeholder="Notes"
-      placeholderTextColor="#8f8f92"
+      placeholderTextColor="#20242A"
       value={vehicleNotes}
       onChangeText={setVehicleNotes}
       multiline
@@ -2745,21 +2828,21 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Reminder date, example: 2026-08-01"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={reminderDate}
                 onChangeText={setReminderDate}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Reminder time, example: 18:30"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={reminderTime}
                 onChangeText={setReminderTime}
               />
               <TextInput
                 style={styles.input}
                 placeholder="What should Tafasili remind you about?"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={reminderNote}
                 onChangeText={setReminderNote}
                 multiline
@@ -2768,8 +2851,8 @@ const getGroupedActivities = () => {
           )}
 
           {!isNonTimedActivity(selectedActivity) && (
-  <TouchableOpacity style={styles.endButton} onPress={endActivity}>
-    <Text style={styles.buttonText}>End Activity</Text>
+  <TouchableOpacity style={[styles.endButton, styles.timerActionButton]} onPress={endActivity}>
+    <Text style={styles.timerActionText}>End Activity</Text>
   </TouchableOpacity>
 )}
 
@@ -2787,8 +2870,8 @@ const getGroupedActivities = () => {
   </View>
 )}
 
-  <TouchableOpacity style={styles.saveButton} onPress={saveSession}>
-  <Text style={styles.buttonText}>
+  <TouchableOpacity style={[styles.saveButton, styles.timerActionButton]} onPress={saveSession}>
+  <Text style={styles.timerActionText}>
     {isVehicleMaintenanceActivity(selectedActivity)
       ? 'Save Maintenance'
       : isPersonalInfoActivity(selectedActivity)
@@ -2807,81 +2890,110 @@ const getGroupedActivities = () => {
     <GestureHandlerRootView style={styles.root}>
       <View style={styles.mainContainer}>
         <ScrollView style={styles.container}>
-          <Text style={styles.title}>Tafasili</Text>
-          <Text style={styles.subtitle}>Welcome, {loginUsername}</Text>
+          <View style={styles.homeTopbar}>
+            <View style={styles.topbarSpacer} />
+            {renderBrand()}
+            <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+              <Text style={styles.languageButtonText}>{isArabic ? 'English' : 'العربية'}</Text>
+            </TouchableOpacity>
+          </View>
 
-          <Text style={styles.homeDescription}>
-            Track sports, training, horse riding, studying, and game sessions.
+          <Text style={[styles.homeHeading, isArabic && styles.rtlText]}>
+            {isArabic ? 'ماذا تريد أن تتتبع؟' : 'What do you want to track?'}
+          </Text>
+          <Text style={[styles.subtitle, styles.homeWelcome, isArabic && styles.rtlText]}>
+            {isArabic ? `مرحباً، ${loginUsername}` : `Welcome, ${loginUsername}`}
+          </Text>
+
+          <Text style={[styles.homeDescription, isArabic && styles.rtlText]}>
+            {isArabic
+              ? 'اختر نوع النشاط، ثم احفظ تفاصيله في سجلك.'
+              : 'Choose an activity type, then save its details to your history.'}
           </Text>
 
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
+            <Text style={styles.logoutButtonText}>{isArabic ? 'تسجيل الخروج' : 'Logout'}</Text>
           </TouchableOpacity>
 
           <View style={styles.statsBox}>
-            <Text style={styles.statsTitle}>Stats</Text>
+            <Text style={[styles.statsTitle, isArabic && styles.rtlText]}>
+              {isArabic ? 'الإحصاءات' : 'Stats'}
+            </Text>
 
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Total Sessions</Text>
+              <Text style={[styles.statLabel, isArabic && styles.rtlText]}>
+                {isArabic ? 'إجمالي الجلسات' : 'Total Sessions'}
+              </Text>
               <Text style={styles.statValue}>{sessions.length}</Text>
             </View>
 
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Total Time</Text>
+              <Text style={[styles.statLabel, isArabic && styles.rtlText]}>
+                {isArabic ? 'إجمالي الوقت' : 'Total Time'}
+              </Text>
               <Text style={styles.statValue}>{getTotalTime()}</Text>
             </View>
 
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Most Practiced</Text>
-              <Text style={styles.statValue}>{getMostPracticedActivity()}</Text>
+              <Text style={[styles.statLabel, isArabic && styles.rtlText]}>
+                {isArabic ? 'الأكثر ممارسة' : 'Most Practiced'}
+              </Text>
+              <Text style={[styles.statValue, isArabic && styles.rtlText]}>
+                {activityDisplayName(getMostPracticedActivity())}
+              </Text>
             </View>
           </View>
 
           <View style={styles.activityList}>
-            {!selectedActivityCategory ? (
-              <>
-                <Text style={styles.activityGroupTitle}>Activity Types</Text>
-                {getGroupedActivities().map((group) => (
-                  <TouchableOpacity
-                    key={group.groupName}
-                    style={styles.categoryButton}
-                    onPress={() => setSelectedActivityCategory(group.groupName)}
-                  >
-                    <View>
-                      <Text style={styles.activityText}>{group.groupName}</Text>
-                      <Text style={styles.categoryCount}>
-                        {group.groupActivities.length} {group.groupActivities.length === 1 ? 'activity' : 'activities'}
-                      </Text>
-                    </View>
-                    <Text style={styles.categoryArrow}>›</Text>
-                  </TouchableOpacity>
-                ))}
+            <Text style={[styles.activityGroupTitle, isArabic && styles.rtlText]}>
+              {isArabic ? 'أنواع الأنشطة' : 'Activity Types'}
+            </Text>
+            {getGroupedActivities().map((group) => (
+              <TouchableOpacity
+                key={group.groupName}
+                style={[
+                  styles.categoryButton,
+                  selectedActivityCategory === group.groupName && styles.categoryButtonActive,
+                  isArabic && styles.categoryButtonRtl,
+                ]}
+                onPress={() => setSelectedActivityCategory(group.groupName)}
+              >
+                <View>
+                  <Text style={[styles.activityText, isArabic && styles.rtlText]}>
+                    {groupDisplayName(group.groupName)}
+                  </Text>
+                  <Text style={[styles.categoryCount, isArabic && styles.rtlText]}>
+                    {group.groupActivities.length}{' '}
+                    {isArabic
+                      ? group.groupActivities.length === 1 ? 'نشاط' : 'أنشطة'
+                      : group.groupActivities.length === 1 ? 'activity' : 'activities'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
 
-                <TouchableOpacity style={styles.resetButton} onPress={resetActivityList}>
-                  <Text style={styles.smallActionText}>Reset Activity List</Text>
-                </TouchableOpacity>
-              </>
-            ) : (
+            {selectedActivityCategory && (
               <>
-                <TouchableOpacity
-                  style={styles.categoryBackButton}
-                  onPress={() => setSelectedActivityCategory(null)}
-                >
-                  <Text style={styles.backButtonText}>← Activity Types</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.activityGroupTitle}>{selectedActivityCategory}</Text>
+                <Text style={[styles.activityGroupTitle, isArabic && styles.rtlText]}>
+                  {groupDisplayName(selectedActivityCategory)}
+                </Text>
 
                 {selectedActivityCategory === 'Custom Activities' && (
                   <TouchableOpacity style={styles.addButton} onPress={openOtherModal}>
-                    <Text style={styles.smallActionText}>+ Add Custom Activity</Text>
+                    <Text style={styles.smallActionText}>
+                      {isArabic ? '+ إضافة نشاط مخصص' : '+ Add Custom Activity'}
+                    </Text>
                   </TouchableOpacity>
                 )}
 
-                <Text style={styles.hintText}>Swipe left on an activity to delete it</Text>
+                <Text style={[styles.hintText, isArabic && styles.rtlText]}>
+                  {isArabic ? 'اسحب النشاط إلى اليسار لحذفه' : 'Swipe left on an activity to delete it'}
+                </Text>
 
                 {activities.filter((activity) => getActivityGroup(activity) === selectedActivityCategory).length === 0 ? (
-                  <Text style={styles.emptyHistory}>No activities in this category yet.</Text>
+                  <Text style={[styles.emptyHistory, isArabic && styles.rtlText]}>
+                    {isArabic ? 'لا توجد أنشطة في هذه الفئة بعد.' : 'No activities in this category yet.'}
+                  </Text>
                 ) : (
                   activities
                     .filter((activity) => getActivityGroup(activity) === selectedActivityCategory)
@@ -2896,13 +3008,21 @@ const getGroupedActivities = () => {
                         style={styles.activityButton}
                         onPress={() => openActivity(activity)}
                       >
-                        <Text style={styles.activityText}>{activity}</Text>
+                        <Text style={[styles.activityText, isArabic && styles.rtlText]}>
+                          {activityDisplayName(activity)}
+                        </Text>
                       </TouchableOpacity>
                     </Swipeable>
                     ))
                 )}
               </>
             )}
+
+            <TouchableOpacity style={styles.resetButton} onPress={resetActivityList}>
+              <Text style={styles.smallActionText}>
+                {isArabic ? 'إعادة ضبط قائمة الأنشطة' : 'Reset Activity List'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
         </ScrollView>
@@ -2916,7 +3036,7 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Example: Boxing"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={otherActivityName}
                 onChangeText={setOtherActivityName}
               />
@@ -2928,7 +3048,7 @@ const getGroupedActivities = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Example: Location, Score, Notes"
-                placeholderTextColor="#8f8f92"
+                placeholderTextColor="#20242A"
                 value={otherActivityFields}
                 onChangeText={setOtherActivityFields}
                 multiline
@@ -2961,43 +3081,119 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
   },
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: '#0f0f10',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    backgroundColor: '#F6F7F9',
   },
   backButton: {
     marginTop: 55,
     marginBottom: 20,
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
   },
   backButtonText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 18,
     fontWeight: '600',
   },
   title: {
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#20242A',
     marginTop: 60,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#b8b8bb',
-    marginBottom: 24,
+    fontSize: 16,
+    color: '#20242A',
+    marginBottom: 14,
+  },
+  homeTopbar: {
+    marginTop: 42,
+    marginBottom: 30,
+    minHeight: 98,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  homeHeading: {
+    color: '#20242A',
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  authTopbar: {
+    width: '100%',
+    marginBottom: 34,
+    minHeight: 98,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  brandLockup: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 2,
+  },
+  brandLockupRtl: {
+    flexDirection: 'column',
+  },
+  brandLogo: {
+    width: 60,
+    height: 76,
+  },
+  brandEnglish: {
+    color: '#20242A',
+    fontSize: 16,
+    lineHeight: 18,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  languageButton: {
+    minWidth: 76,
+    minHeight: 42,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
+    backgroundColor: '#FFFFFF',
+  },
+  topbarSpacer: {
+    width: 76,
+  },
+  languageButtonText: {
+    color: '#20242A',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  rtlText: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
   },
   statsBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 16,
     marginBottom: 22,
   },
   statsTitle: {
-    color: '#ffffff',
-    fontSize: 26,
+    color: '#20242A',
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 14,
   },
@@ -3005,17 +3201,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statLabel: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 15,
     marginBottom: 3,
   },
   statValue: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: '700',
   },
   hintText: {
-    color: '#a7a7aa',
+    color: '#20242A',
     fontSize: 14,
     marginBottom: 12,
   },
@@ -3026,18 +3222,20 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    backgroundColor: '#4a4a4d',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 14,
     borderRadius: 12,
   },
   resetButton: {
     flex: 1,
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#E7E9EE',
     padding: 14,
     borderRadius: 12,
   },
   smallActionText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',
@@ -3047,8 +3245,8 @@ const styles = StyleSheet.create({
 },
 
 activityGroupTitle: {
-  color: '#ffffff',
-  fontSize: 22,
+  color: '#20242A',
+  fontSize: 16,
   fontWeight: 'bold',
   marginBottom: 12,
 },
@@ -3061,41 +3259,40 @@ activityGroupTitle: {
     paddingVertical: 16,
     paddingHorizontal: 18,
     borderRadius: 14,
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
     borderWidth: 1,
-    borderColor: '#3a3a3d',
+    borderColor: '#E7E9EE',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  categoryButtonRtl: {
+    flexDirection: 'row-reverse',
+  },
+  categoryButtonActive: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF',
+  },
   categoryCount: {
-    color: '#a7a7aa',
+    color: '#20242A',
     fontSize: 14,
     marginTop: 5,
   },
-  categoryArrow: {
-    color: '#ffffff',
-    fontSize: 34,
-    lineHeight: 36,
-  },
-  categoryBackButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 10,
-    marginBottom: 4,
-  },
   activityButton: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 14,
     marginBottom: 12,
   },
   activityText: {
-    color: '#ffffff',
-    fontSize: 20,
+    color: '#20242A',
+    fontSize: 16,
     fontWeight: '600',
   },
   swipeDeleteAction: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     justifyContent: 'center',
     alignItems: 'center',
     width: 95,
@@ -3103,38 +3300,38 @@ activityGroupTitle: {
     marginBottom: 12,
   },
   swipeDeleteText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 16,
     fontWeight: '700',
   },
   addExerciseButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     marginTop: 14,
   },
   deleteLastButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
   },
   resetLapButton: {
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
     marginBottom: 4,
   },
   exerciseListBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 14,
     borderRadius: 12,
     marginTop: 4,
     marginBottom: 12,
   },
   exerciseListTitle: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -3143,7 +3340,7 @@ activityGroupTitle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '#3a3a3d',
+    borderBottomColor: '#E7E9EE',
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
@@ -3151,13 +3348,13 @@ activityGroupTitle: {
     flex: 1,
   },
   exerciseName: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: '700',
     marginBottom: 4,
   },
   exerciseDeleteButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     width: 34,
     height: 34,
     borderRadius: 17,
@@ -3166,7 +3363,7 @@ activityGroupTitle: {
     marginLeft: 10,
   },
   exerciseDeleteText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontWeight: 'bold',
     fontSize: 15,
   },
@@ -3178,102 +3375,115 @@ activityGroupTitle: {
   },
   balootTotalColumn: {
     flex: 1,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     borderRadius: 14,
     padding: 18,
     alignItems: 'center',
   },
   balootSideTitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 18,
     marginBottom: 8,
   },
   balootTotalNumber: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 42,
     fontWeight: 'bold',
   },
   winnerBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 14,
     borderRadius: 12,
     marginBottom: 16,
   },
   winnerLabel: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 15,
     marginBottom: 4,
   },
   winnerText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
   },
   dealerBox: {
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 18,
     borderRadius: 14,
     alignItems: 'center',
     marginBottom: 16,
   },
   dealerTitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 8,
   },
   dealerArrow: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 64,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   dealerHint: {
-    color: '#a7a7aa',
+    color: '#20242A',
     fontSize: 14,
   },
   startButton: {
-    backgroundColor: '#4a4a4d',
+    backgroundColor: '#2563EB',
     padding: 18,
     borderRadius: 14,
     marginBottom: 14,
   },
   endButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#2563EB',
     padding: 18,
     borderRadius: 14,
     marginBottom: 24,
   },
   saveButton: {
-    backgroundColor: '#5a5a5d',
+    backgroundColor: '#2563EB',
     padding: 18,
     borderRadius: 14,
     marginTop: 24,
     marginBottom: 60,
   },
+  timerActionButton: {
+    backgroundColor: '#E7E9EE',
+    borderWidth: 1,
+    borderColor: '#D0D5DD',
+  },
+  timerActionText: {
+    color: '#20242A',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
   cancelButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#2563EB',
     padding: 16,
     borderRadius: 12,
   },
   buttonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
   },
   infoBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 18,
     borderRadius: 14,
     marginBottom: 18,
   },
   infoText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     marginBottom: 10,
   },
   durationText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 8,
@@ -3285,32 +3495,36 @@ activityGroupTitle: {
     padding: 24,
   },
   modalBox: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 18,
     padding: 24,
   },
   modalTitle: {
-    color: '#ffffff',
-    fontSize: 28,
+    color: '#20242A',
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   modalSubtitle: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 18,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     borderRadius: 12,
     padding: 16,
     fontSize: 18,
     marginBottom: 12,
-    color: '#000000',
+    color: '#20242A',
   },
   candleBox: {
     alignItems: 'center',
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     borderRadius: 14,
     padding: 18,
     marginBottom: 12,
@@ -3384,13 +3598,13 @@ activityGroupTitle: {
     backgroundColor: '#fffaf0',
   },
   candleTime: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 36,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   candleHint: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -3400,7 +3614,7 @@ activityGroupTitle: {
     height: 6,
     marginTop: 12,
     borderRadius: 3,
-    backgroundColor: '#343437',
+    backgroundColor: '#E7E9EE',
     overflow: 'hidden',
   },
   candleProgressFill: {
@@ -3414,7 +3628,7 @@ activityGroupTitle: {
   },
   candleButton: {
     flex: 1,
-    backgroundColor: '#3a3a3d',
+    backgroundColor: '#2563EB',
     borderRadius: 12,
     padding: 14,
   },
@@ -3423,28 +3637,28 @@ activityGroupTitle: {
 },
 
 historyFilterButton: {
-  backgroundColor: '#1f1f22',
+  backgroundColor: '#FFFFFF',
   paddingVertical: 10,
   paddingHorizontal: 14,
   borderRadius: 20,
   marginRight: 10,
   borderWidth: 1,
-  borderColor: '#3a3a3d',
+  borderColor: '#E7E9EE',
 },
 
 historyFilterButtonActive: {
-  backgroundColor: '#4a4a4d',
-  borderColor: '#4a4a4d',
+  backgroundColor: '#2563EB',
+  borderColor: '#2563EB',
 },
 
 historyFilterText: {
-  color: '#b8b8bb',
+  color: '#20242A',
   fontSize: 14,
   fontWeight: '600',
 },
 
 historyFilterTextActive: {
-  color: '#ffffff',
+  color: '#FFFFFF',
 },
   historySection: {
     marginTop: 10,
@@ -3457,68 +3671,70 @@ historyFilterTextActive: {
     marginBottom: 12,
   },
   historyTitle: {
-    color: '#ffffff',
-    fontSize: 28,
+    color: '#20242A',
+    fontSize: 24,
     fontWeight: 'bold',
   },
   clearHistoryButton: {
-    backgroundColor: '#3f3f42',
+    backgroundColor: '#E7E9EE',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,
   },
   clearHistoryText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 14,
     fontWeight: '600',
   },
   emptyHistory: {
-    color: '#b8b8bb',
+    color: '#20242A',
     fontSize: 16,
   },
   sessionCard: {
-    backgroundColor: '#1f1f22',
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderWidth: 1,
+    borderColor: '#E7E9EE',
     padding: 16,
     borderRadius: 14,
     marginBottom: 12,
   },
   sessionActivity: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   sessionText: {
-    color: '#d6d6d8',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 4,
   },
   sessionDuration: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: 'bold',
     marginTop: 6,
   },
   savedDetailsBox: {
     marginTop: 10,
-    backgroundColor: '#0f0f10',
+    backgroundColor: '#F6F7F9',
     padding: 12,
     borderRadius: 10,
   },
   savedDetailsHeader: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 17,
     fontWeight: 'bold',
     marginTop: 8,
     marginBottom: 4,
   },
   savedDetailsText: {
-    color: '#ffffff',
+    color: '#20242A',
     fontSize: 16,
     marginBottom: 4,
   },
   savedSetText: {
-    color: '#d6d6d8',
+    color: '#20242A',
     fontSize: 15,
     marginLeft: 12,
     marginBottom: 3,
@@ -3528,33 +3744,33 @@ historyFilterTextActive: {
   },
   loginContainer: {
   flexGrow: 1,
-  backgroundColor: '#0f0f10',
+  backgroundColor: '#F6F7F9',
   padding: 24,
   justifyContent: 'center',
 },
 loginTitle: {
-  fontSize: 42,
+  fontSize: 22,
   fontWeight: 'bold',
-  color: '#ffffff',
+  color: '#20242A',
   marginBottom: 8,
   textAlign: 'center',
 },
 loginTagline: {
-  fontSize: 18,
-  color: '#ffffff',
+  fontSize: 16,
+  color: '#20242A',
   fontWeight: '800',
-  lineHeight: 26,
+  lineHeight: 22,
   marginBottom: 12,
   textAlign: 'center',
 },
 loginSubtitle: {
   fontSize: 18,
-  color: '#b8b8bb',
+  color: '#20242A',
   marginBottom: 30,
   textAlign: 'center',
 },
 loginHint: {
-  color: '#a7a7aa',
+  color: '#20242A',
   fontSize: 14,
   textAlign: 'center',
   marginTop: 12,
@@ -3566,32 +3782,44 @@ authModeRow: {
 },
 authModeButton: {
   flex: 1,
-  borderColor: '#3a3a3d',
+  borderColor: '#E7E9EE',
   borderWidth: 1,
   borderRadius: 12,
   padding: 12,
 },
 authModeButtonActive: {
-  backgroundColor: '#4a4a4d',
+  backgroundColor: '#E7E9EE',
+  borderColor: '#D0D5DD',
 },
 authModeText: {
-  color: '#ffffff',
+  color: '#20242A',
   fontWeight: '800',
   textAlign: 'center',
 },
+authSubmitButton: {
+  backgroundColor: '#E7E9EE',
+  borderWidth: 1,
+  borderColor: '#D0D5DD',
+},
+authSubmitText: {
+  color: '#20242A',
+  fontSize: 18,
+  fontWeight: '700',
+  textAlign: 'center',
+},
 signupHelp: {
-  color: '#a7a7aa',
+  color: '#20242A',
   fontSize: 14,
   marginBottom: 22,
 },
 signupDivider: {
-  color: '#a7a7aa',
+  color: '#20242A',
   fontSize: 16,
   textAlign: 'center',
   marginBottom: 12,
 },
 secondaryAuthButton: {
-  borderColor: '#3a3a3d',
+  borderColor: '#E7E9EE',
   borderWidth: 1,
   borderRadius: 12,
   padding: 15,
@@ -3599,41 +3827,47 @@ secondaryAuthButton: {
   marginBottom: 12,
 },
 secondaryAuthButtonText: {
-  color: '#ffffff',
+  color: '#20242A',
   fontSize: 16,
   fontWeight: '800',
   textAlign: 'center',
 },
 socialButton: {
-  borderColor: '#3a3a3d',
+  borderColor: '#E7E9EE',
   borderWidth: 1,
   borderRadius: 12,
   padding: 15,
   marginBottom: 12,
 },
 socialButtonText: {
-  color: '#ffffff',
+  color: '#20242A',
   fontSize: 16,
   fontWeight: '800',
   textAlign: 'center',
 },
 logoutButton: {
-  backgroundColor: '#3a3a3d',
+  backgroundColor: '#FFFFFF',
+  borderWidth: 1,
+  borderColor: '#E7E9EE',
   padding: 12,
   borderRadius: 12,
   marginBottom: 20,
 },
 logoutButtonText: {
-  color: '#ffffff',
+  color: '#20242A',
   fontSize: 16,
   fontWeight: '700',
   textAlign: 'center',
 },
 homeDescription: {
-  color: '#a7a7aa',
-  fontSize: 15,
+  color: '#20242A',
+  fontSize: 14,
   lineHeight: 22,
   marginBottom: 20,
+},
+homeWelcome: {
+  color: '#20242A',
+  fontSize: 14,
 },
 sessionTopRow: {
   flexDirection: 'row',
@@ -3643,26 +3877,26 @@ sessionTopRow: {
 },
 
 activityBadge: {
-  backgroundColor: '#4a4a4d',
+  backgroundColor: '#2563EB',
   paddingVertical: 6,
   paddingHorizontal: 12,
   borderRadius: 999,
 },
 
 activityBadgeText: {
-  color: '#ffffff',
+  color: '#FFFFFF',
   fontSize: 14,
   fontWeight: '700',
 },
 
 sessionDate: {
-  color: '#b8b8bb',
+  color: '#20242A',
   fontSize: 14,
   fontWeight: '600',
 },
 
 sessionDurationLarge: {
-  color: '#ffffff',
+  color: '#20242A',
   fontSize: 24,
   fontWeight: 'bold',
   marginBottom: 10,
@@ -3671,18 +3905,19 @@ sessionDurationLarge: {
 sessionTimeRow: {
   flexDirection: 'row',
   justifyContent: 'space-between',
-  backgroundColor: '#0f0f10',
+  backgroundColor: '#F6F7F9',
   padding: 12,
   borderRadius: 10,
   marginBottom: 8,
 },
 
 sessionTimeText: {
-  color: '#d6d6d8',
+  color: '#20242A',
   fontSize: 14,
   fontWeight: '600',
 },
 selectedOptionButton: {
-  backgroundColor: '#5a5a5d',
+  backgroundColor: '#DDE7FC',
+  borderColor: '#2563EB',
 },
 });
