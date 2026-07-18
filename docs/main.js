@@ -9,9 +9,11 @@ const storageKeys = {
 };
 const passwordIterations = 210000;
 const cloudConfig = window.TAFASILI_SUPABASE;
+const passwordRecoveryHashParams = new URLSearchParams(window.location.hash.slice(1));
+const passwordRecoverySearchParams = new URLSearchParams(window.location.search);
 const passwordRecoveryRequestedAtLoad =
-  new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery' ||
-  new URLSearchParams(window.location.search).get('type') === 'recovery';
+  passwordRecoveryHashParams.get('type') === 'recovery' ||
+  passwordRecoverySearchParams.get('type') === 'recovery';
 const cloudClient = window.supabase && cloudConfig
   ? window.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey, {
       auth: {
@@ -3297,6 +3299,44 @@ document.querySelectorAll('[data-auth-mode]').forEach((tab) => {
   tab.addEventListener('click', () => setAuthMode(tab.dataset.authMode));
 });
 
+async function ensurePasswordRecoverySession() {
+  const { data: existingData } = await cloudClient.auth.getSession();
+
+  if (existingData.session) {
+    return existingData.session;
+  }
+
+  const accessToken = passwordRecoveryHashParams.get('access_token');
+  const refreshToken = passwordRecoveryHashParams.get('refresh_token');
+
+  if (accessToken && refreshToken) {
+    const { data, error } = await cloudClient.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (!error && data.session) {
+      return data.session;
+    }
+  }
+
+  const authorizationCode = passwordRecoverySearchParams.get('code');
+
+  if (authorizationCode) {
+    const { data, error } = await cloudClient.auth.exchangeCodeForSession(authorizationCode);
+
+    if (!error && data.session) {
+      return data.session;
+    }
+  }
+
+  throw new Error(
+    state.language === 'ar'
+      ? 'انتهت صلاحية رابط إعادة التعيين. اطلب رابطاً جديداً.'
+      : 'This reset link has expired. Request a new password reset link.'
+  );
+}
+
 languageButton.addEventListener('click', () => {
   state.language = state.language === 'en' ? 'ar' : 'en';
   localStorage.setItem(storageKeys.language, state.language);
@@ -3328,6 +3368,7 @@ authForm.addEventListener('submit', async (event) => {
         return;
       }
 
+      await ensurePasswordRecoverySession();
       const { data, error } = await cloudClient.auth.updateUser({ password });
 
       if (error || !data.user) {
@@ -3534,6 +3575,11 @@ async function initializeCloudAccount() {
     state.passwordRecovery = true;
     setAuthMode('recovery');
     showView('auth', false);
+    try {
+      await ensurePasswordRecoverySession();
+    } catch (recoveryError) {
+      authMessage.textContent = recoveryError?.message || 'Request a new password reset link.';
+    }
     return;
   }
 
