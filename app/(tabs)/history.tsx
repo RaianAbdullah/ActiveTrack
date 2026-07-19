@@ -480,7 +480,6 @@ export default function HistoryScreen() {
     }
 
     if (
-      session.activity === 'Horse Riding' &&
       session.details?.horseRiding
     ) {
       const horse = session.details.horseRiding;

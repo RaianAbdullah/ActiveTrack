@@ -41,7 +41,6 @@ import {
   GymExercise,
   GymSet,
   HorseFeedEntry,
-  HorseLogType,
   MatchRound,
   Session,
 } from '../../types';
@@ -54,6 +53,9 @@ const defaultActivities = [
   'Tennis',
   'Golf',
   'Horse Riding',
+  'Daily Care',
+  'Supplies and Feed',
+  'Riding Test',
   'Cycling',
   'Walking',
   'Swimming',
@@ -67,6 +69,7 @@ const defaultActivities = [
 const lapActivities = ['Run', 'Walking', 'Cycling', 'Swimming'];
 const movementActivities = ['Run', 'Walking', 'Cycling'];
 const matchActivities = ['Padel', 'Tennis'];
+const horseActivities = ['Horse Riding', 'Daily Care', 'Supplies and Feed', 'Riding Test'];
 const STUDY_CANDLE_DURATION_SECONDS = 3 * 60 * 60;
 const arabicActivityNames: Record<string, string> = {
   Football: 'كرة القدم',
@@ -76,6 +79,9 @@ const arabicActivityNames: Record<string, string> = {
   Tennis: 'تنس',
   Golf: 'جولف',
   'Horse Riding': 'ركوب الخيل',
+  'Daily Care': 'العناية اليومية بالخيل',
+  'Supplies and Feed': 'مستلزمات وعلف الخيل',
+  'Riding Test': 'اختبار الركوب',
   Cycling: 'الدراجات',
   Walking: 'المشي',
   Swimming: 'السباحة',
@@ -212,7 +218,6 @@ export default function HomeScreen() {
   const [workNotes, setWorkNotes] = useState('');
 
   const [horseRiderName, setHorseRiderName] = useState('');
-  const [horseLogType, setHorseLogType] = useState<HorseLogType>('Horse Riding');
   const [horseName, setHorseName] = useState('');
   const [horseTrainingType, setHorseTrainingType] = useState('');
   const [horseTrainingIntensity, setHorseTrainingIntensity] = useState('');
@@ -673,7 +678,7 @@ const logout = async () => {
   };
 
   const isHorseRidingActivity = (activity: string | null) => {
-    return activity === 'Horse Riding';
+    return Boolean(activity && horseActivities.includes(activity));
   };
 
   const isVehicleMaintenanceActivity = (activity: string | null) => {
@@ -689,7 +694,7 @@ const logout = async () => {
   };
 
   const isSelectedActivityNonTimed = (activity: string | null) => {
-    return isNonTimedActivity(activity) || (isHorseRidingActivity(activity) && horseLogType !== 'Horse Riding');
+    return isNonTimedActivity(activity) || (isHorseRidingActivity(activity) && activity !== 'Horse Riding');
   };
 
   const getSensitiveEnding = (value: string) => {
@@ -710,7 +715,7 @@ const logout = async () => {
   };
 
   const supportsReminders = (activity: string | null) => {
-    return Boolean(activity && ['Gym', 'Horse Riding', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity));
+    return Boolean(activity && (['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity) || horseActivities.includes(activity)));
   };
 
   const formatStudyCandleDuration = (durationSeconds: number) => {
@@ -997,7 +1002,6 @@ const logout = async () => {
     setCustomFieldValues({});
 
     setHorseRiderName('');
-    setHorseLogType('Horse Riding');
     setHorseName('');
     setHorseTrainingType('');
     setHorseTrainingIntensity('');
@@ -1532,7 +1536,7 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
     if (isHorseRidingActivity(selectedActivity)) {
       newSession.details = {
         horseRiding: {
-          logType: horseLogType,
+          logType: selectedActivity as 'Horse Riding' | 'Daily Care' | 'Supplies and Feed' | 'Riding Test',
           riderName: horseRiderName.trim(),
           horseName: horseName.trim(),
           trainingType: horseTrainingType.trim(),
@@ -1760,7 +1764,7 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
     return 'Fitness and Movement';
   }
 
-  if (activity === 'Horse Riding') {
+  if (horseActivities.includes(activity)) {
     return 'Horse Activities';
   }
 
@@ -2916,8 +2920,6 @@ const getGroupedActivities = () => {
           
           <HorseRidingTracker
   selectedActivity={selectedActivity}
-  horseLogType={horseLogType}
-  setHorseLogType={setHorseLogType}
   horseRiderName={horseRiderName}
   setHorseRiderName={setHorseRiderName}
   horseName={horseName}

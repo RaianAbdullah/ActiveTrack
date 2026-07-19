@@ -11,9 +11,6 @@ import { HorseFeedEntry, HorseLogType } from '../types';
 type Props = {
   selectedActivity: string | null;
 
-  horseLogType: HorseLogType;
-  setHorseLogType: Dispatch<SetStateAction<HorseLogType>>;
-
   horseRiderName: string;
   setHorseRiderName: Dispatch<SetStateAction<string>>;
 
@@ -136,9 +133,13 @@ type Props = {
 };
 
 export default function HorseRidingTracker(props: Props) {
-  if (props.selectedActivity !== 'Horse Riding') {
+  const horseLogTypes: HorseLogType[] = ['Horse Riding', 'Daily Care', 'Supplies and Feed', 'Riding Test'];
+
+  if (!props.selectedActivity || !horseLogTypes.includes(props.selectedActivity as HorseLogType)) {
     return null;
   }
+
+  const horseLogType = props.selectedActivity as HorseLogType;
 
   const renderYesNoButton = (
     label: string,
@@ -184,32 +185,9 @@ export default function HorseRidingTracker(props: Props) {
 
   return (
     <View style={styles.detailsBox}>
-      <Text style={styles.detailsTitle}>Horse Logs</Text>
+      <Text style={styles.detailsTitle}>{horseLogType}</Text>
 
-      <Text style={styles.detailsSubtitle}>Choose horse activity</Text>
-      <View style={styles.logTypeGrid}>
-        {(['Horse Riding', 'Daily Care', 'Supplies and Feed', 'Riding Test'] as HorseLogType[]).map((logType) => (
-          <TouchableOpacity
-            key={logType}
-            style={[
-              styles.logTypeButton,
-              props.horseLogType === logType && styles.selectedToggleButton,
-            ]}
-            onPress={() => props.setHorseLogType(logType)}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                props.horseLogType === logType && styles.selectedToggleText,
-              ]}
-            >
-              {logType}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {(props.horseLogType === 'Horse Riding' || props.horseLogType === 'Riding Test') && (
+      {(horseLogType === 'Horse Riding' || horseLogType === 'Riding Test') && (
         <TextInput
           style={styles.input}
           placeholder="Rider name"
@@ -227,7 +205,7 @@ export default function HorseRidingTracker(props: Props) {
         onChangeText={props.setHorseName}
       />
 
-      {props.horseLogType === 'Horse Riding' && (
+      {horseLogType === 'Horse Riding' && (
         <>
 
       <TextInput
@@ -386,7 +364,7 @@ export default function HorseRidingTracker(props: Props) {
         </>
       )}
 
-      {props.horseLogType === 'Daily Care' && (
+      {horseLogType === 'Daily Care' && (
         <>
           <Text style={styles.detailsSubtitle}>Daily Care</Text>
 
@@ -408,7 +386,7 @@ export default function HorseRidingTracker(props: Props) {
         </>
       )}
 
-      {props.horseLogType === 'Supplies and Feed' && (
+      {horseLogType === 'Supplies and Feed' && (
         <>
           <Text style={styles.detailsSubtitle}>Farrier</Text>
 
@@ -517,7 +495,7 @@ export default function HorseRidingTracker(props: Props) {
         </>
       )}
 
-      {props.horseLogType === 'Riding Test' && (
+      {horseLogType === 'Riding Test' && (
         <>
           <Text style={styles.detailsSubtitle}>Dressage Test</Text>
 
@@ -624,21 +602,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 12,
     marginTop: 6,
-  },
-  logTypeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 14,
-  },
-  logTypeButton: {
-    width: '48%',
-    minHeight: 52,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#D0D5DD',
-    borderRadius: 10,
-    padding: 12,
   },
   performanceBox: {
     borderWidth: 1,

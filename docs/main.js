@@ -32,6 +32,9 @@ const defaultActivities = [
   'Tennis',
   'Golf',
   'Horse Riding',
+  'Daily Care',
+  'Supplies and Feed',
+  'Riding Test',
   'Cycling',
   'Walking',
   'Swimming',
@@ -53,7 +56,7 @@ const activitySections = [
   },
   {
     key: 'horse',
-    activities: ['Horse Riding'],
+    activities: ['Horse Riding', 'Daily Care', 'Supplies and Feed', 'Riding Test'],
   },
   {
     key: 'studyWork',
@@ -68,6 +71,8 @@ const activitySections = [
     activities: ['Vehicle Maintenance'],
   },
 ];
+
+const horseActivities = ['Horse Riding', 'Daily Care', 'Supplies and Feed', 'Riding Test'];
 
 const translations = {
   en: {
@@ -161,6 +166,9 @@ const translations = {
       Swimming: 'Laps, distance, timer',
       Baloot: 'Scores, dealer, winner',
       'Horse Riding': 'Horse, training, care notes',
+      'Daily Care': 'Daily horse care, notes, reminder',
+      'Supplies and Feed': 'Cleaning, monthly feed, farrier',
+      'Riding Test': 'Dressage, jumping, notes',
       Golf: 'Balls, club, range notes',
       Studying: 'Subject, study type, notes',
       Work: 'Project, time, notes',
@@ -259,6 +267,9 @@ const translations = {
       Swimming: 'اللفات، المسافة، المؤقت',
       Baloot: 'النقاط، الموزع، الفائز',
       'Horse Riding': 'الخيل، التدريب، ملاحظات العناية',
+      'Daily Care': 'العناية اليومية بالخيل والملاحظات والتذكير',
+      'Supplies and Feed': 'التنظيف والعلف الشهري والبيطار',
+      'Riding Test': 'الدريساج والقفز والملاحظات',
       Golf: 'عدد الكرات، العصا، ملاحظات الملعب',
       Studying: 'المادة، نوع الدراسة، الملاحظات',
       Work: 'المشروع، الوقت، الملاحظات',
@@ -272,6 +283,9 @@ const translations = {
       Tennis: 'تنس',
       Golf: 'جولف',
       'Horse Riding': 'ركوب الخيل',
+      'Daily Care': 'العناية اليومية',
+      'Supplies and Feed': 'المستلزمات والعلف',
+      'Riding Test': 'اختبار الركوب',
       Cycling: 'الدراجات',
       Walking: 'المشي',
       Swimming: 'السباحة',
@@ -327,7 +341,6 @@ const state = {
   balootScores: [],
   balootDealerDirection: '↑',
   horseFeedCount: 1,
-  horseLogType: 'riding',
 };
 
 const authCard = document.querySelector('.auth-card');
@@ -905,7 +918,7 @@ function getCustomTemplateFields(activity) {
 }
 
 function supportsReminders(activity) {
-  return ['Gym', 'Horse Riding', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity);
+  return ['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity) || horseActivities.includes(activity);
 }
 
 function isNonTimedActivity(activity) {
@@ -913,7 +926,7 @@ function isNonTimedActivity(activity) {
 }
 
 function isSelectedActivityNonTimed(activity) {
-  return isNonTimedActivity(activity) || (activity === 'Horse Riding' && state.horseLogType !== 'riding');
+  return isNonTimedActivity(activity) || (horseActivities.includes(activity) && activity !== 'Horse Riding');
 }
 
 function isSessionNonTimed(session) {
@@ -1157,9 +1170,8 @@ function renderHome() {
 
 function openTracker(activity) {
   resetStudyCandle();
-  if (activity === 'Horse Riding') {
+  if (activity === 'Supplies and Feed') {
     state.horseFeedCount = 1;
-    state.horseLogType = 'riding';
   }
   state.selectedActivity = activity;
   state.startTime = null;
@@ -1175,7 +1187,6 @@ function openTracker(activity) {
   timerCard.hidden = isSelectedActivityNonTimed(activity) || activity === 'Studying' || activity === 'Work';
   activityFields.innerHTML = getFieldsForActivity(activity);
   bindConditionalFields();
-  bindHorseLogType();
   bindHorseFeedEntries();
   if (activity === 'Studying' || activity === 'Work') {
     resetStudyCandle();
@@ -1275,7 +1286,6 @@ function refreshOpenTrackerLanguage() {
   activityFields.innerHTML = getFieldsForActivity(activity);
   restoreActivityFieldValues(savedFields);
   bindConditionalFields();
-  bindHorseLogType();
   bindHorseFeedEntries();
 
   if (activity === 'Studying' || activity === 'Work') {
@@ -1534,19 +1544,8 @@ function getFieldsForActivity(activity) {
     `;
   }
 
-  if (activity === 'Horse Riding') {
+  if (horseActivities.includes(activity)) {
     const commonHorseField = inputField(horseText('horseName'), 'horseName', horseText('horseNamePlaceholder'));
-    const logTypeSelector = `
-      <label class="horse-log-selector">
-        ${horseText('logType')}
-        <select id="horse-log-type" name="horseLogType">
-          <option value="riding" ${state.horseLogType === 'riding' ? 'selected' : ''}>${horseText('logHorseRiding')}</option>
-          <option value="dailyCare" ${state.horseLogType === 'dailyCare' ? 'selected' : ''}>${horseText('logDailyCare')}</option>
-          <option value="supplies" ${state.horseLogType === 'supplies' ? 'selected' : ''}>${horseText('logSupplies')}</option>
-          <option value="ridingTest" ${state.horseLogType === 'ridingTest' ? 'selected' : ''}>${horseText('logRidingTest')}</option>
-        </select>
-      </label>
-    `;
     const notesAndReminder = `
       ${fieldSection(horseText('notesSection'), [
         textAreaField(horseText('horseNotes'), 'horseNotes', horseText('horseNotes'), true),
@@ -1554,10 +1553,9 @@ function getFieldsForActivity(activity) {
       ${reminderFields()}
     `;
 
-    if (state.horseLogType === 'riding') {
+    if (activity === 'Horse Riding') {
       return `
         <div class="horse-form">
-          ${logTypeSelector}
           ${fieldSection(horseText('trainingSection'), [
             inputField(horseText('riderName'), 'riderName', horseText('riderNamePlaceholder')),
             commonHorseField,
@@ -1589,10 +1587,9 @@ function getFieldsForActivity(activity) {
       `;
     }
 
-    if (state.horseLogType === 'dailyCare') {
+    if (activity === 'Daily Care') {
       return `
         <div class="horse-form">
-          ${logTypeSelector}
           ${fieldSection(horseText('dailyCareSection'), [
             commonHorseField,
             checkboxField(horseText('hayGiven'), 'hayGiven'),
@@ -1605,10 +1602,9 @@ function getFieldsForActivity(activity) {
       `;
     }
 
-    if (state.horseLogType === 'supplies') {
+    if (activity === 'Supplies and Feed') {
       return `
         <div class="horse-form">
-          ${logTypeSelector}
           ${fieldSection(horseText('farrierSection'), [
             commonHorseField,
             inputField(horseText('farrierVisit'), 'farrierVisit', '17/07/2026'),
@@ -1636,7 +1632,6 @@ function getFieldsForActivity(activity) {
 
     return `
       <div class="horse-form">
-        ${logTypeSelector}
         ${fieldSection(horseText('dressageSection'), [
           inputField(horseText('riderName'), 'riderName', horseText('riderNamePlaceholder')),
           commonHorseField,
@@ -1954,31 +1949,6 @@ function bindConditionalFields() {
   });
 }
 
-function bindHorseLogType() {
-  const logTypeSelect = document.querySelector('#horse-log-type');
-
-  if (!logTypeSelect) {
-    return;
-  }
-
-  logTypeSelect.addEventListener('change', () => {
-    const savedFields = captureActivityFieldValues();
-    state.horseLogType = logTypeSelect.value;
-    state.startTime = null;
-    state.endTime = null;
-    stopTimer();
-    timerDisplay.textContent = '00:00:00';
-    timerNote.textContent = text('timerNote');
-    timerCard.hidden = isSelectedActivityNonTimed('Horse Riding');
-    trackerView.classList.toggle('vehicle-mode', isSelectedActivityNonTimed('Horse Riding'));
-    activityFields.innerHTML = getFieldsForActivity('Horse Riding');
-    restoreActivityFieldValues(savedFields);
-    bindConditionalFields();
-    bindHorseLogType();
-    bindHorseFeedEntries();
-  });
-}
-
 function bindHorseFeedEntries() {
   const addFeedButton = document.querySelector('#horse-add-feed');
 
@@ -1989,10 +1959,9 @@ function bindHorseFeedEntries() {
   addFeedButton.addEventListener('click', () => {
     const savedFields = captureActivityFieldValues();
     state.horseFeedCount += 1;
-    activityFields.innerHTML = getFieldsForActivity('Horse Riding');
+    activityFields.innerHTML = getFieldsForActivity('Supplies and Feed');
     restoreActivityFieldValues(savedFields);
     bindConditionalFields();
-    bindHorseLogType();
     bindHorseFeedEntries();
   });
 }
@@ -3008,13 +2977,8 @@ function getSessionDetails() {
     details[field.name] = field.value;
   });
 
-  if (state.selectedActivity === 'Horse Riding') {
-    details.horseLogType = {
-      riding: 'Horse Riding',
-      dailyCare: 'Daily Care',
-      supplies: 'Cleaning Supplies, Monthly Feed and Farrier',
-      ridingTest: 'Riding Test',
-    }[state.horseLogType];
+  if (horseActivities.includes(state.selectedActivity)) {
+    details.horseLogType = state.selectedActivity;
 
     details.feedEntries = Array.from(
       sessionForm.querySelectorAll('[data-horse-feed-entry]')
