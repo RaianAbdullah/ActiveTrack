@@ -341,6 +341,7 @@ const state = {
   customActivities: readJson(storageKeys.customActivities, []),
   customTemplates: readJson(storageKeys.customTemplates, {}),
   customGroups: readJson(storageKeys.customGroups, {}),
+  customActivityUsesTimer: false,
   currentGymSets: [],
   gymExercises: [],
   gymRestSeconds: 0,
@@ -1218,7 +1219,9 @@ function getCustomTemplateFields(activity) {
 }
 
 function supportsReminders(activity) {
-  return ['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity) || horseActivities.includes(activity);
+  return state.customActivities.includes(activity)
+    || ['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity)
+    || horseActivities.includes(activity);
 }
 
 function isNonTimedActivity(activity) {
@@ -1226,7 +1229,9 @@ function isNonTimedActivity(activity) {
 }
 
 function isSelectedActivityNonTimed(activity) {
-  return isNonTimedActivity(activity) || (horseActivities.includes(activity) && activity !== 'Horse Riding');
+  return isNonTimedActivity(activity)
+    || (horseActivities.includes(activity) && activity !== 'Horse Riding')
+    || (state.customActivities.includes(activity) && !state.customActivityUsesTimer);
 }
 
 function isSessionNonTimed(session) {
@@ -1706,6 +1711,7 @@ async function finishOnboarding() {
 
 async function openTracker(activity, restoreDraft = false) {
   resetStudyCandle();
+  state.customActivityUsesTimer = false;
   if (activity === 'Supplies and Feed') {
     state.horseFeedCount = 1;
   }
@@ -1724,6 +1730,9 @@ async function openTracker(activity, restoreDraft = false) {
   activityFields.innerHTML = getFieldsForActivity(activity);
   bindConditionalFields();
   bindHorseFeedEntries();
+  if (state.customActivities.includes(activity)) {
+    bindCustomTimerToggle();
+  }
   if (activity === 'Studying' || activity === 'Work') {
     resetStudyCandle();
     bindStudyCandle();
@@ -1742,6 +1751,15 @@ async function openTracker(activity, restoreDraft = false) {
       const field = sessionForm.querySelector(`[name="${CSS.escape(name)}"]`);
       if (field && 'value' in field) field.value = String(value ?? '');
     });
+  }
+  if (state.customActivities.includes(activity)) {
+    const restoredTimerValue = state.draft?.activity === activity
+      ? state.draft.values?.customUseTimer
+      : undefined;
+    state.customActivityUsesTimer = restoredTimerValue === 'on' || restoredTimerValue === 'true';
+    const customTimerToggle = sessionForm.querySelector('[name="customUseTimer"]');
+    if (customTimerToggle) customTimerToggle.checked = state.customActivityUsesTimer;
+    updateCustomTimerVisibility();
   }
   if (activity === 'Work') {
     sessionForm.querySelector('[name="workCandleHours"]').value = '3';
@@ -1774,6 +1792,12 @@ function trackerHelperText(activity) {
     return state.language === 'ar'
       ? 'حدد التفاصيل واستخدم مؤقت الشمعة ثم احفظ الجلسة.'
       : 'Set the details, use the candle timer, then save the session.';
+  }
+
+  if (state.customActivities.includes(activity)) {
+    return state.language === 'ar'
+      ? 'أدخل التفاصيل واحفظها. استخدام المؤقت اختياري.'
+      : 'Enter the details and save. The timer is optional.';
   }
 
   return text('trackerTimed');
@@ -1830,6 +1854,13 @@ function refreshOpenTrackerLanguage() {
   restoreActivityFieldValues(savedFields);
   bindConditionalFields();
   bindHorseFeedEntries();
+
+  if (state.customActivities.includes(activity)) {
+    bindCustomTimerToggle();
+    const toggle = sessionForm.querySelector('[name="customUseTimer"]');
+    if (toggle) toggle.checked = state.customActivityUsesTimer;
+    updateCustomTimerVisibility();
+  }
 
   if (activity === 'Studying' || activity === 'Work') {
     bindStudyCandle();
@@ -1908,11 +1939,21 @@ function getMovementAverageSpeed(durationSeconds) {
 
 function getFieldsForActivity(activity) {
   if (state.customActivities.includes(activity)) {
-    return fieldGrid(
-      getCustomTemplateFields(activity).map((field, index) =>
-        inputField(escapeHtml(field), `customField${index}`, escapeHtml(field))
-      )
-    );
+    const timerLabels = state.language === 'ar'
+      ? { title: 'استخدام المؤقت', help: 'اختياري. يمكنك حفظ النشاط بدون وقت.' }
+      : { title: 'Use timer', help: 'Optional. You can save this activity without timing it.' };
+    return `
+      <label class="settings-toggle custom-timer-toggle">
+        <span><strong>${timerLabels.title}</strong><small>${timerLabels.help}</small></span>
+        <input name="customUseTimer" type="checkbox" />
+      </label>
+      ${fieldGrid(
+        getCustomTemplateFields(activity).map((field, index) =>
+          inputField(escapeHtml(field), `customField${index}`, escapeHtml(field))
+        )
+      )}
+      ${reminderFields()}
+    `;
   }
 
   if (activity === 'Football') {
@@ -2505,6 +2546,29 @@ function bindConditionalFields() {
 
     control.addEventListener('change', updateVisibility);
     updateVisibility();
+  });
+}
+
+function updateCustomTimerVisibility() {
+  const isCustom = state.customActivities.includes(state.selectedActivity);
+  const hideTimer = isCustom && !state.customActivityUsesTimer;
+  timerCard.hidden = hideTimer || isSelectedActivityNonTimed(state.selectedActivity)
+    || state.selectedActivity === 'Studying' || state.selectedActivity === 'Work';
+  trackerView.classList.toggle('vehicle-mode', hideTimer || isSelectedActivityNonTimed(state.selectedActivity));
+}
+
+function bindCustomTimerToggle() {
+  const toggle = sessionForm.querySelector('[name="customUseTimer"]');
+  if (!toggle) return;
+  toggle.addEventListener('change', () => {
+    state.customActivityUsesTimer = toggle.checked;
+    if (!toggle.checked) {
+      stopTimer();
+      state.startTime = null;
+      state.endTime = null;
+      timerDisplay.textContent = '00:00:00';
+    }
+    updateCustomTimerVisibility();
   });
 }
 
@@ -3477,6 +3541,8 @@ function getSessionDetails() {
         label,
         value: sessionForm.querySelector(`[name="customField${index}"]`)?.value.trim() || '',
       })),
+      customUsesTimer: state.customActivityUsesTimer,
+      reminder: getReminderDetails(),
     };
   }
 
@@ -3998,7 +4064,11 @@ function renderSessionDetails(session) {
   }
 
   if (Array.isArray(session.details?.customFields)) {
-    return session.details.customFields
+    const timerLabel = state.language === 'ar' ? 'المؤقت' : 'Timer';
+    const timerValue = session.details.customUsesTimer
+      ? state.language === 'ar' ? 'مستخدم' : 'Used'
+      : state.language === 'ar' ? 'غير مستخدم' : 'Not used';
+    return `<div><span>${timerLabel}</span>${timerValue}</div>` + session.details.customFields
       .map(
         (field) =>
           `<div><span>${escapeHtml(field.label)}</span>${escapeHtml(field.value || text('noDetails'))}</div>`

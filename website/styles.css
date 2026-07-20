@@ -1594,6 +1594,20 @@ body.rtl .category-card {
   height: 22px;
 }
 
+.custom-timer-toggle {
+  padding: 12px 0;
+}
+
+.custom-timer-toggle > span {
+  display: grid;
+  gap: 4px;
+}
+
+.custom-timer-toggle small {
+  color: #20242a;
+  font-weight: 500;
+}
+
 .device-list {
   display: grid;
   gap: 8px;

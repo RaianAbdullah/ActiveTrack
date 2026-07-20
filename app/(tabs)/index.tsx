@@ -206,6 +206,7 @@ export default function HomeScreen() {
   const [customActivityTemplates, setCustomActivityTemplates] = useState<Record<string, string[]>>({});
   const [customActivityGroups, setCustomActivityGroups] = useState<Record<string, string>>({});
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [customActivityUsesTimer, setCustomActivityUsesTimer] = useState(false);
 
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
@@ -398,7 +399,7 @@ export default function HomeScreen() {
 
   draftValuesRef.current = {
     footballTeamOneName, footballTeamTwoName, footballTeamOneScore, footballTeamTwoScore,
-    gymWorkoutDay, gymCustomWorkout, gymExerciseName, routeName, elevationGain, splitNotes, movementGoal, personalRecord,
+    gymWorkoutDay, gymCustomWorkout, gymExerciseName, customActivityUsesTimer, routeName, elevationGain, splitNotes, movementGoal, personalRecord,
     matchTeamOneName, matchTeamTwoName, balootUsName, balootThemName,
     studySubject, studyType, studyExamDate, studyCoursework, studyPomodoroPlan,
     studyStreak, studyTotalHours, studyNotes, workProjectName, workCandleHours,
@@ -1008,7 +1009,9 @@ const logout = async () => {
   };
 
   const isSelectedActivityNonTimed = (activity: string | null) => {
-    return isNonTimedActivity(activity) || (isHorseRidingActivity(activity) && activity !== 'Horse Riding');
+    return isNonTimedActivity(activity)
+      || (isHorseRidingActivity(activity) && activity !== 'Horse Riding')
+      || (isCustomActivity(activity) && !customActivityUsesTimer);
   };
 
   const getSensitiveEnding = (value: string) => {
@@ -1029,7 +1032,7 @@ const logout = async () => {
   };
 
   const supportsReminders = (activity: string | null) => {
-    return Boolean(activity && (['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity) || horseActivities.includes(activity)));
+    return Boolean(activity && (isCustomActivity(activity) || ['Gym', 'Studying', 'Work', 'Vehicle Maintenance'].includes(activity) || horseActivities.includes(activity)));
   };
 
   const supportsExpirationReminders = (activity: string | null) => {
@@ -1291,6 +1294,7 @@ const logout = async () => {
     setGymSetWeight('');
     setCurrentGymSets([]);
     setGymExercises([]);
+    setCustomActivityUsesTimer(false);
 
     setLapCount(0);
     setLapDistance('');
@@ -1424,6 +1428,7 @@ const logout = async () => {
     setGymWorkoutDay(textValue('gymWorkoutDay'));
     setGymCustomWorkout(textValue('gymCustomWorkout'));
     setGymExerciseName(textValue('gymExerciseName'));
+    setCustomActivityUsesTimer(values.customActivityUsesTimer === true || values.customActivityUsesTimer === 'true');
     setRouteName(textValue('routeName'));
     setElevationGain(textValue('elevationGain'));
     setSplitNotes(textValue('splitNotes'));
@@ -2127,7 +2132,7 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
         value: customFieldValues[label]?.trim() || '',
       }));
 
-      newSession.details = { customFields };
+      newSession.details = { customFields, customUsesTimer: customActivityUsesTimer };
     }
 
     if (isPersonalInfoActivity(selectedActivity)) {
@@ -2837,6 +2842,9 @@ const getGroupedActivities = () => {
       return (
         <View style={styles.savedDetailsBox}>
           <Text style={styles.savedDetailsHeader}>Custom Details:</Text>
+          <Text style={styles.savedDetailsText}>
+            Timer: {session.details.customUsesTimer ? 'Used' : 'Not used'}
+          </Text>
           {session.details.customFields.map((field, index) => (
             <Text key={`${field.label}-${index}`} style={styles.savedDetailsText}>
               {field.label}: {field.value || 'Not filled'}
@@ -3086,9 +3094,13 @@ const getGroupedActivities = () => {
               ? isArabic
                 ? 'حدد التفاصيل واستخدم مؤقت الشمعة'
                 : 'Set the details and use the candle timer'
-              : isArabic
-                ? 'سجل تفاصيل نشاطك'
-                : 'Track your activity session'}
+              : isCustomActivity(selectedActivity)
+                ? isArabic
+                  ? 'أدخل التفاصيل واحفظها. استخدام المؤقت اختياري.'
+                  : 'Enter the details and save. The timer is optional.'
+                : isArabic
+                  ? 'سجل تفاصيل نشاطك'
+                  : 'Track your activity session'}
           </Text>
           {!isSelectedActivityNonTimed(selectedActivity) && !isFocusActivity(selectedActivity) && (
           <TouchableOpacity style={[styles.startButton, styles.timerActionButton]} onPress={startActivity}>
@@ -3145,7 +3157,29 @@ const getGroupedActivities = () => {
 
           {isCustomActivity(selectedActivity) && (
             <View style={styles.infoBox}>
-              <Text style={styles.savedDetailsHeader}>Custom Details</Text>
+              <View style={styles.customTimerRow}>
+                <View style={styles.customTimerCopy}>
+                  <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
+                    {isArabic ? 'استخدام المؤقت' : 'Use timer'}
+                  </Text>
+                  <Text style={[styles.candleHint, isArabic && styles.rtlText]}>
+                    {isArabic ? 'اختياري. يمكنك حفظ النشاط بدون وقت.' : 'Optional. You can save this activity without timing it.'}
+                  </Text>
+                </View>
+                <Switch
+                  value={customActivityUsesTimer}
+                  onValueChange={(enabled) => {
+                    setCustomActivityUsesTimer(enabled);
+                    if (!enabled) {
+                      setStartTime(null);
+                      setEndTime(null);
+                    }
+                  }}
+                />
+              </View>
+              <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
+                {isArabic ? 'تفاصيل مخصصة' : 'Custom Details'}
+              </Text>
               {getCustomTemplateFields(selectedActivity).map((field) => (
                 <TextInput
                   key={field}
@@ -4735,6 +4769,16 @@ activityGroupTitle: {
     padding: 18,
     borderRadius: 14,
     marginBottom: 18,
+  },
+  customTimerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 14,
+    marginBottom: 18,
+  },
+  customTimerCopy: {
+    flex: 1,
   },
   infoText: {
     color: '#050505',

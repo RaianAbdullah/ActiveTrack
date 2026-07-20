@@ -983,6 +983,9 @@ export default function HistoryScreen() {
       return (
         <View style={styles.detailsBox}>
           <Text style={styles.detailsTitle}>Custom Details</Text>
+          <Text style={styles.detailsText}>
+            Timer: {session.details.customUsesTimer ? 'Used' : 'Not used'}
+          </Text>
           {session.details.customFields.map((field, index) => (
             <Text key={`${field.label}-${index}`} style={styles.detailsText}>
               {field.label}: {field.value || 'Not filled'}

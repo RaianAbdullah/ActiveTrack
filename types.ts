@@ -188,6 +188,7 @@ export type SessionDetails = {
   studying?: StudyingDetails;
   work?: WorkDetails;
   customFields?: CustomFieldValue[];
+  customUsesTimer?: boolean;
   reminder?: ReminderDetails;
   expirationReminders?: ExpirationReminderDetails[];
   personalInfo?: PersonalInfoDetails;
