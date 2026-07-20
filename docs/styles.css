@@ -130,9 +130,7 @@ a {
 }
 
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -160,6 +158,11 @@ a {
   color: #050505;
   font-size: 21px;
   line-height: 1;
+}
+
+.top-actions > #logout-button {
+  font-size: 25px;
+  font-weight: 400;
 }
 
 .topbar > #back-button:hover,

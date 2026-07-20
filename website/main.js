@@ -663,7 +663,7 @@ function applyLanguage() {
   languageButton.setAttribute('aria-label', state.language === 'ar' ? 'التبديل إلى الإنجليزية' : 'Switch to Arabic');
   backButton.textContent = state.language === 'ar' ? '→' : '←';
   backButton.setAttribute('aria-label', state.language === 'ar' ? 'رجوع' : 'Go back');
-  logoutButton.textContent = '↪';
+  logoutButton.textContent = '⏻';
   logoutButton.setAttribute('aria-label', state.language === 'ar' ? 'تسجيل الخروج' : 'Log out');
   setText('#auth-eyebrow', text('authEyebrow'));
   setText('#hero-title', text('heroTitle'));
