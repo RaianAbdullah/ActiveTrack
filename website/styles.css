@@ -1542,12 +1542,24 @@ body.rtl .category-card {
   align-items: stretch;
 }
 
+.activity-option-row.custom {
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+}
+
 .favorite-toggle {
   min-height: 42px;
   border: 0;
   background: transparent;
   color: #050505;
   font-size: 1.25rem;
+}
+
+.custom-activity-delete {
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  color: #050505;
+  font-size: 1.15rem;
 }
 
 .history-tools {

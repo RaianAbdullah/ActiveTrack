@@ -424,7 +424,6 @@ const onboardingNext = document.querySelector('#onboarding-next');
 const onboardingSkip = document.querySelector('#onboarding-skip');
 const todayDashboard = document.querySelector('#today-dashboard');
 const favoriteActivities = document.querySelector('#favorite-activities');
-const recentActivities = document.querySelector('#recent-activities');
 const historySearch = document.querySelector('#history-search');
 const historyDateRange = document.querySelector('#history-date-range');
 const historyViewMode = document.querySelector('#history-view-mode');
@@ -1570,13 +1569,17 @@ function renderActivitySection(activities) {
           ? activities
               .map(
                 (activity) => `
-                  <div class="activity-option-row">
+                  <div class="activity-option-row${state.customActivities.includes(activity) ? ' custom' : ''}">
                     <button class="favorite-toggle" type="button" data-favorite-activity="${escapeHtml(activity)}" aria-label="Favorite ${escapeHtml(activityLabel(activity))}">
                       ${state.settings.favoriteActivities.includes(activity) ? '★' : '☆'}
                     </button>
                     <button class="activity-option-button" type="button" data-activity="${escapeHtml(activity)}">
                       ${escapeHtml(activityLabel(activity))}
                     </button>
+                    ${state.customActivities.includes(activity) ? `
+                      <button class="custom-activity-delete" type="button" data-delete-custom-activity="${escapeHtml(activity)}" aria-label="${state.language === 'ar' ? 'حذف' : 'Delete'} ${escapeHtml(activityLabel(activity))}">
+                        <span aria-hidden="true">&#128465;</span>
+                      </button>` : ''}
                   </div>
                 `
               )
@@ -1623,7 +1626,46 @@ function renderTodayAndQuickAccess() {
   `;
 
   renderQuickActivityGroup(favoriteActivities, state.language === 'ar' ? 'المفضلة' : 'Favorites', state.settings.favoriteActivities, true);
-  renderQuickActivityGroup(recentActivities, state.language === 'ar' ? 'الأخيرة' : 'Recent', state.settings.recentActivities.slice(0, 4), false);
+}
+
+async function deleteCustomActivity(activity) {
+  const confirmed = window.confirm(state.language === 'ar'
+    ? `حذف ${activityLabel(activity)} من قائمة الأنشطة؟ سيبقى السجل السابق محفوظاً.`
+    : `Delete ${activityLabel(activity)} from your activities? Existing history will stay saved.`);
+  if (!confirmed) return;
+
+  state.customActivities = state.customActivities.filter((item) => item !== activity);
+  delete state.customTemplates[activity];
+  delete state.customGroups[activity];
+  writeJson(accountStorageKey(storageKeys.customActivities), state.customActivities);
+  writeJson(accountStorageKey(storageKeys.customTemplates), state.customTemplates);
+  writeJson(accountStorageKey(storageKeys.customGroups), state.customGroups);
+  await saveUsabilitySettings({
+    ...state.settings,
+    favoriteActivities: state.settings.favoriteActivities.filter((item) => item !== activity),
+    recentActivities: state.settings.recentActivities.filter((item) => item !== activity),
+  });
+
+  if (state.draft?.activity === activity) {
+    state.draft = null;
+    localStorage.removeItem(accountStorageKey(storageKeys.draft));
+  }
+
+  try {
+    if (cloudClient && state.userId) {
+      const { error } = await cloudClient
+        .from('custom_activities')
+        .delete()
+        .eq('user_id', state.userId)
+        .eq('name', activity);
+      if (error) throw error;
+    }
+  } catch {
+    window.alert(state.language === 'ar'
+      ? 'تم الحذف من هذا الجهاز، لكن تعذر حذفه من السحابة.'
+      : 'Deleted on this device, but cloud deletion failed.');
+  }
+  renderHome();
 }
 
 function renderQuickActivityGroup(container, title, activities, favorite) {
@@ -4469,6 +4511,7 @@ document.addEventListener('click', (event) => {
   const duplicateButton = event.target.closest('[data-duplicate-session]');
   const deleteButton = event.target.closest('[data-delete-session]');
   const favoriteButton = event.target.closest('[data-favorite-activity]');
+  const deleteCustomActivityButton = event.target.closest('[data-delete-custom-activity]');
   const repeatButton = event.target.closest('[data-repeat-last]');
   const continueDraftButton = event.target.closest('[data-continue-draft]');
   const settingsAction = event.target.closest('[data-settings-action]');
@@ -4499,6 +4542,10 @@ document.addEventListener('click', (event) => {
 
   if (favoriteButton) {
     void toggleFavoriteActivity(favoriteButton.dataset.favoriteActivity);
+  }
+
+  if (deleteCustomActivityButton) {
+    void deleteCustomActivity(deleteCustomActivityButton.dataset.deleteCustomActivity);
   }
 
   if (repeatButton && state.sessions[0]) {

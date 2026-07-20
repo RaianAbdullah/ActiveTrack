@@ -1611,6 +1611,11 @@ const logout = async () => {
     saveCustomTemplatesToStorage(newTemplates);
     setCustomActivityGroups(newGroups);
     saveCustomGroupsToStorage(newGroups);
+    await persistSettings({
+      ...settings,
+      favoriteActivities: settings.favoriteActivities.filter((activity) => activity !== activityName),
+      recentActivities: settings.recentActivities.filter((activity) => activity !== activityName),
+    });
 
     try {
       await deleteCloudCustomActivity(activityName);
@@ -3937,19 +3942,6 @@ const getGroupedActivities = () => {
             </View>
           )}
 
-          {settings.recentActivities.length > 0 && (
-            <View style={styles.quickSection}>
-              <Text style={[styles.statsTitle, isArabic && styles.rtlText]}>{isArabic ? 'الأخيرة' : 'Recent'}</Text>
-              <View style={styles.quickActivityRow}>
-                {settings.recentActivities.slice(0, 4).map((activity) => (
-                  <TouchableOpacity key={activity} style={styles.quickActivityButton} onPress={() => openActivity(activity)}>
-                    <Text style={styles.quickActivityText}>{activityDisplayName(activity)}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-
           <View style={styles.statsBox}>
             <Text style={[styles.statsTitle, isArabic && styles.rtlText]}>
               {isArabic ? 'الإحصاءات' : 'Stats'}
@@ -4060,14 +4052,16 @@ const getGroupedActivities = () => {
                                 {activityDisplayName(activity)}
                               </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.activityDropdownDelete}
-                              onPress={() => confirmDeleteActivity(activity)}
-                              accessibilityRole="button"
-                              accessibilityLabel={`${isArabic ? 'حذف' : 'Delete'} ${activityDisplayName(activity)}`}
-                            >
-                              <Text style={styles.activityDropdownDeleteText}>×</Text>
-                            </TouchableOpacity>
+                            {isCustomActivity(activity) && (
+                              <TouchableOpacity
+                                style={styles.activityDropdownDelete}
+                                onPress={() => confirmDeleteActivity(activity)}
+                                accessibilityRole="button"
+                                accessibilityLabel={`${isArabic ? 'حذف' : 'Delete'} ${activityDisplayName(activity)}`}
+                              >
+                                <Ionicons name="trash-outline" size={20} color="#050505" />
+                              </TouchableOpacity>
+                            )}
                           </View>
                         ))
                       )}
