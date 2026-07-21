@@ -1117,7 +1117,7 @@ function showDueExpirationReminders() {
     .map((reminder) => `${reminder.label}: ${reminder.expirationDate}`)
     .join('\n');
   if (state.settings.notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, { body: message, icon: './assets/tafasili-favicon.png' });
+    new Notification(title, { body: message, icon: './assets/tafasili-favicon.png?v=20260721-logo-v9' });
   }
   window.alert(`${title}\n\n${message}`);
 }
@@ -1150,7 +1150,7 @@ function showDueSessionReminders() {
     localStorage.setItem(alertKey, 'true');
     new Notification(`${state.language === 'ar' ? 'تذكير' : 'Reminder'}: ${activityLabel(session.activity)}`, {
       body: reminder.note || activityLabel(session.activity),
-      icon: './assets/tafasili-favicon.png',
+      icon: './assets/tafasili-favicon.png?v=20260721-logo-v9',
     });
   });
 }

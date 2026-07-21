@@ -17,7 +17,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F6F7F9",
-        "foregroundImage": "./assets/images/tafasili-logo.png"
+        "foregroundImage": "./assets/images/tafasili-adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

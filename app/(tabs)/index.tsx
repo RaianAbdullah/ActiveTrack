@@ -640,9 +640,6 @@ export default function HomeScreen() {
         style={styles.brandLogo}
         resizeMode="contain"
       />
-      <View>
-        <Text style={styles.brandEnglish}>Tafasili</Text>
-      </View>
     </View>
   );
 
@@ -4487,15 +4484,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   brandLogo: {
-    width: 62,
-    height: 78,
-  },
-  brandEnglish: {
-    color: '#050505',
-    fontSize: 18,
-    lineHeight: 20,
-    fontWeight: '900',
-    textAlign: 'center',
+    width: 108,
+    height: 108,
   },
   languageButton: {
     width: 44,

@@ -186,33 +186,20 @@ a {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
   transform: translateX(-50%);
 }
 
 .brand-mark {
   display: grid;
-  width: 60px;
-  height: 76px;
+  width: 108px;
+  height: 108px;
   place-items: center;
 }
 
 .brand-mark img {
-  width: 60px;
-  height: 76px;
+  width: 108px;
+  height: 108px;
   object-fit: contain;
-}
-
-.brand-name {
-  display: grid;
-  gap: 1px;
-  line-height: 1;
-  text-align: center;
-}
-
-.brand-name strong {
-  font-size: calc(1rem + 2px);
-  font-weight: 900;
 }
 
 .hidden {
