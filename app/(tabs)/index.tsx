@@ -67,6 +67,7 @@ import {
   ExpirationReminderDetails,
   GymExercise,
   GymSet,
+  HorseCleaningSupplyEntry,
   HorseFeedEntry,
   MatchRound,
   Session,
@@ -310,6 +311,7 @@ export default function HomeScreen() {
   const [horseFeedEntries, setHorseFeedEntries] = useState<HorseFeedEntry[]>([
     { amount: '', buyingDate: '' },
   ]);
+  const [horseCustomCleaningSupplies, setHorseCustomCleaningSupplies] = useState<HorseCleaningSupplyEntry[]>([]);
 
   const [horseFoodOilBuyingDate, setHorseFoodOilBuyingDate] = useState('');
   const [horseShampooBuyingDate, setHorseShampooBuyingDate] = useState('');
@@ -344,6 +346,7 @@ export default function HomeScreen() {
   const [reminderDate, setReminderDate] = useState('');
   const [reminderTime, setReminderTime] = useState('');
   const [reminderNote, setReminderNote] = useState('');
+  const [reminderNotificationEnabled, setReminderNotificationEnabled] = useState(false);
   const [personalIdNumber, setPersonalIdNumber] = useState('');
   const [personalIdExpirationDate, setPersonalIdExpirationDate] = useState('');
   const [personalDlExpirationDate, setPersonalDlExpirationDate] = useState('');
@@ -369,6 +372,7 @@ export default function HomeScreen() {
     reminderDate,
     reminderTime,
     reminderNote,
+    reminderNotificationEnabled,
   });
 
   latestStudySessionRef.current = {
@@ -389,6 +393,7 @@ export default function HomeScreen() {
     reminderDate,
     reminderTime,
     reminderNote,
+    reminderNotificationEnabled,
   };
   const autoSaveCompletedStudyCandleRef = useRef<() => void>(() => undefined);
   autoSaveCompletedStudyCandleRef.current = () => {
@@ -409,7 +414,7 @@ export default function HomeScreen() {
     horseFarrierVisit, horseNextFarrierVisit, horseNotes, vehicleName,
     vehiclePlateNumber, vehicleServiceType, vehicleServiceDate, vehicleMileage,
     vehicleCost, vehicleInsuranceExpirationDate, vehicleRegistrationEndDate,
-    vehicleNotes, reminderDate, reminderTime, reminderNote, personalIdNumber,
+    vehicleNotes, reminderDate, reminderTime, reminderNote, reminderNotificationEnabled, personalIdNumber,
     personalIdExpirationDate, personalDlExpirationDate, personalPassportNumber,
     personalPassportExpirationDate, expirationReminderLeadDays,
   };
@@ -873,7 +878,7 @@ const logout = async () => {
           .forEach((name) => {
             mergedActivities.set(name, {
               category: localGroups[name] ?? 'Life Tracking',
-              fields: localTemplates[name] ?? ['Session title', 'Notes'],
+              fields: localTemplates[name] ?? [],
             });
           });
 
@@ -977,7 +982,9 @@ const logout = async () => {
   };
 
   const getCustomTemplateFields = (activity: string) => {
-    return customActivityTemplates[activity] || ['Session title', 'Notes'];
+    return (customActivityTemplates[activity] || []).filter(
+      (field) => !['session title', 'notes'].includes(field.trim().toLowerCase())
+    );
   };
 
   const isMatchActivity = (activity: string | null) => {
@@ -1133,6 +1140,7 @@ const logout = async () => {
           date: snapshot.reminderDate.trim(),
           time: snapshot.reminderTime.trim(),
           note: snapshot.reminderNote.trim(),
+          notificationEnabled: snapshot.reminderNotificationEnabled,
         }
       : undefined;
     const completedSession: Session = {
@@ -1363,6 +1371,7 @@ const logout = async () => {
     setReminderDate('');
     setReminderTime('');
     setReminderNote('');
+    setReminderNotificationEnabled(false);
     setPersonalIdNumber('');
     setPersonalIdExpirationDate('');
     setPersonalDlExpirationDate('');
@@ -1400,6 +1409,7 @@ const logout = async () => {
     setHorseHoofOilUsed(false);
 
     setHorseFeedEntries([{ amount: '', buyingDate: '' }]);
+    setHorseCustomCleaningSupplies([]);
 
     setHorseFoodOilBuyingDate('');
     setHorseShampooBuyingDate('');
@@ -1476,6 +1486,9 @@ const logout = async () => {
     setReminderDate(textValue('reminderDate'));
     setReminderTime(textValue('reminderTime'));
     setReminderNote(textValue('reminderNote'));
+    setReminderNotificationEnabled(
+      values.reminderNotificationEnabled === true || values.reminderNotificationEnabled === 'true'
+    );
     setPersonalIdNumber(textValue('personalIdNumber'));
     setPersonalIdExpirationDate(textValue('personalIdExpirationDate'));
     setPersonalDlExpirationDate(textValue('personalDlExpirationDate'));
@@ -1565,7 +1578,7 @@ const logout = async () => {
       .slice(0, 8);
     const newTemplates = {
       ...customActivityTemplates,
-      [cleanName]: fields.length > 0 ? fields : ['Session title', 'Notes'],
+      [cleanName]: fields,
     };
     const newGroups = {
       ...customActivityGroups,
@@ -2091,6 +2104,12 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
               buyingDate: feed.buyingDate.trim(),
             }))
             .filter((feed) => feed.amount || feed.buyingDate),
+          customCleaningSupplies: horseCustomCleaningSupplies
+            .map((supply) => ({
+              name: supply.name.trim(),
+              buyingDate: supply.buyingDate.trim(),
+            }))
+            .filter((supply) => supply.name || supply.buyingDate),
 
           foodOilBuyingDate: horseFoodOilBuyingDate.trim(),
           shampooBuyingDate: horseShampooBuyingDate.trim(),
@@ -2168,6 +2187,7 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
           date: reminderDate.trim(),
           time: reminderTime.trim(),
           note: reminderNote.trim(),
+          notificationEnabled: reminderNotificationEnabled,
         },
       };
     }
@@ -2187,7 +2207,10 @@ if (!isSelectedActivityNonTimed(selectedActivity) && (!startTime || !endTime)) {
       alert('Saved on this device, but cloud sync failed.');
     }
 
-    if (settings.notificationsEnabled) {
+    if (
+      settings.notificationsEnabled
+      || newSession.details?.reminder?.notificationEnabled
+    ) {
       try {
         await scheduleSessionNotifications(
           selectedActivity,
@@ -2705,6 +2728,17 @@ const getGroupedActivities = () => {
             Pads Supplies Bought: {horse.padsCleaningSuppliesBuyingDate || 'Not filled'}
           </Text>
 
+          {horse.customCleaningSupplies?.map((supply, index) => (
+            <View key={`saved-cleaning-supply-${index}`}>
+              <Text style={styles.savedDetailsText}>
+                Additional Supply {index + 1}: {supply.name || 'Not filled'}
+              </Text>
+              <Text style={styles.savedDetailsText}>
+                Bought: {supply.buyingDate || 'Not filled'}
+              </Text>
+            </View>
+          ))}
+
           <Text style={styles.savedDetailsHeader}>Feed:</Text>
           {horse.feedEntries?.length ? (
             horse.feedEntries.map((feed, index) => (
@@ -3182,25 +3216,29 @@ const getGroupedActivities = () => {
                   }}
                 />
               </View>
-              <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
-                {isArabic ? 'تفاصيل مخصصة' : 'Custom Details'}
-              </Text>
-              {getCustomTemplateFields(selectedActivity).map((field) => (
-                <TextInput
-                  key={field}
-                  style={styles.input}
-                  placeholder={field}
-                  placeholderTextColor="#050505"
-                  value={customFieldValues[field] || ''}
-                  onChangeText={(value) =>
-                    setCustomFieldValues((currentValues) => ({
-                      ...currentValues,
-                      [field]: value,
-                    }))
-                  }
-                  multiline={field.toLowerCase().includes('note')}
-                />
-              ))}
+              {getCustomTemplateFields(selectedActivity).length > 0 && (
+                <>
+                  <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
+                    {isArabic ? 'تفاصيل مخصصة' : 'Custom Details'}
+                  </Text>
+                  {getCustomTemplateFields(selectedActivity).map((field) => (
+                    <TextInput
+                      key={field}
+                      style={styles.input}
+                      placeholder={field}
+                      placeholderTextColor="#050505"
+                      value={customFieldValues[field] || ''}
+                      onChangeText={(value) =>
+                        setCustomFieldValues((currentValues) => ({
+                          ...currentValues,
+                          [field]: value,
+                        }))
+                      }
+                      multiline={field.toLowerCase().includes('note')}
+                    />
+                  ))}
+                </>
+              )}
             </View>
           )}
 
@@ -3593,6 +3631,8 @@ const getGroupedActivities = () => {
   setHorseHoofOilUsed={setHorseHoofOilUsed}
   horseFeedEntries={horseFeedEntries}
   setHorseFeedEntries={setHorseFeedEntries}
+  horseCustomCleaningSupplies={horseCustomCleaningSupplies}
+  setHorseCustomCleaningSupplies={setHorseCustomCleaningSupplies}
   horseFoodOilBuyingDate={horseFoodOilBuyingDate}
   setHorseFoodOilBuyingDate={setHorseFoodOilBuyingDate}
   horseShampooBuyingDate={horseShampooBuyingDate}
@@ -3745,29 +3785,49 @@ const getGroupedActivities = () => {
 
           {supportsReminders(selectedActivity) && (
             <View style={styles.infoBox}>
-              <Text style={styles.savedDetailsHeader}>Reminder</Text>
+              <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
+                {isArabic ? 'التذكير' : 'Reminder'}
+              </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Reminder date, example: 2026-08-01"
-                placeholderTextColor="#050505"
-                value={reminderDate}
-                onChangeText={setReminderDate}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Reminder time, example: 18:30"
-                placeholderTextColor="#050505"
-                value={reminderTime}
-                onChangeText={setReminderTime}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Reminder details"
+                placeholder={isArabic ? 'ملاحظة التذكير' : 'Reminder note'}
                 placeholderTextColor="#050505"
                 value={reminderNote}
                 onChangeText={setReminderNote}
                 multiline
               />
+              <View style={styles.customTimerRow}>
+                <View style={styles.customTimerCopy}>
+                  <Text style={[styles.savedDetailsHeader, isArabic && styles.rtlText]}>
+                    {isArabic ? 'إرسال إشعار' : 'Send notification'}
+                  </Text>
+                  <Text style={[styles.candleHint, isArabic && styles.rtlText]}>
+                    {isArabic ? 'اختياري. اختر التاريخ والوقت.' : 'Optional. Choose when you want to be notified.'}
+                  </Text>
+                </View>
+                <Switch
+                  value={reminderNotificationEnabled}
+                  onValueChange={setReminderNotificationEnabled}
+                />
+              </View>
+              {reminderNotificationEnabled && (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={isArabic ? 'تاريخ التذكير، مثال: 2026-08-01' : 'Reminder date, example: 2026-08-01'}
+                    placeholderTextColor="#050505"
+                    value={reminderDate}
+                    onChangeText={setReminderDate}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder={isArabic ? 'وقت التذكير، مثال: 18:30' : 'Reminder time, example: 18:30'}
+                    placeholderTextColor="#050505"
+                    value={reminderTime}
+                    onChangeText={setReminderTime}
+                  />
+                </>
+              )}
             </View>
           )}
 

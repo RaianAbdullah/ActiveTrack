@@ -815,6 +815,16 @@ body.rtl .category-card {
   grid-column: 1 / -1;
 }
 
+.field-grid > .full {
+  grid-column: 1 / -1;
+}
+
+.optional-supply-builder,
+#horse-cleaning-supply-list {
+  display: grid;
+  gap: 12px;
+}
+
 .horse-form {
   display: grid;
   gap: 16px;
@@ -849,6 +859,13 @@ body.rtl .category-card {
 
 .horse-feed-entry strong {
   color: #050505;
+}
+
+.horse-entry-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .add-feed-button {

@@ -76,9 +76,13 @@ export const scheduleSessionNotifications = async (
   reminder?: ReminderDetails,
   expirations: ExpirationReminderDetails[] = []
 ) => {
+  const shouldScheduleReminder = Boolean(reminder?.date && reminder.notificationEnabled !== false);
+
+  if (!shouldScheduleReminder && expirations.length === 0) return true;
+
   const allowed = await requestNotificationAccess();
   if (!allowed) return false;
-  if (reminder?.date) {
+  if (shouldScheduleReminder && reminder?.date) {
     const date = notificationDate(reminder.date, reminder.time);
     if (date) await scheduleAt(`Tafasili: ${activity}`, reminder.note || `Reminder for ${activity}`, date);
   }

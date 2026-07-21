@@ -37,6 +37,11 @@ export type HorseFeedEntry = {
   buyingDate: string;
 };
 
+export type HorseCleaningSupplyEntry = {
+  name: string;
+  buyingDate: string;
+};
+
 export type HorseLogType =
   | 'Horse Riding'
   | 'Daily Care'
@@ -79,6 +84,7 @@ export type HorseRidingDetails = {
   equiJewelAmount?: string;
   equiJewelBuyingDate?: string;
   feedEntries?: HorseFeedEntry[];
+  customCleaningSupplies?: HorseCleaningSupplyEntry[];
 
   foodOilBuyingDate?: string;
   shampooBuyingDate?: string;
@@ -129,6 +135,7 @@ export type ReminderDetails = {
   date?: string;
   time?: string;
   note?: string;
+  notificationEnabled?: boolean;
 };
 
 export type ExpirationReminderDetails = {

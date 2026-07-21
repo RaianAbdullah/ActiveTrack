@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { HorseFeedEntry, HorseLogType } from '../types';
+import { HorseCleaningSupplyEntry, HorseFeedEntry, HorseLogType } from '../types';
 
 type Props = {
   selectedActivity: string | null;
@@ -91,6 +91,9 @@ type Props = {
 
   horseFeedEntries: HorseFeedEntry[];
   setHorseFeedEntries: Dispatch<SetStateAction<HorseFeedEntry[]>>;
+
+  horseCustomCleaningSupplies: HorseCleaningSupplyEntry[];
+  setHorseCustomCleaningSupplies: Dispatch<SetStateAction<HorseCleaningSupplyEntry[]>>;
 
   horseFoodOilBuyingDate: string;
   setHorseFoodOilBuyingDate: Dispatch<SetStateAction<string>>;
@@ -183,11 +186,36 @@ export default function HorseRidingTracker(props: Props) {
     );
   };
 
+  const updateCleaningSupply = (
+    index: number,
+    key: keyof HorseCleaningSupplyEntry,
+    value: string
+  ) => {
+    props.setHorseCustomCleaningSupplies((entries) =>
+      entries.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [key]: value } : entry
+      )
+    );
+  };
+
+  const addCleaningSupply = () => {
+    props.setHorseCustomCleaningSupplies((entries) => [
+      ...entries,
+      { name: '', buyingDate: '' },
+    ]);
+  };
+
+  const removeCleaningSupply = (index: number) => {
+    props.setHorseCustomCleaningSupplies((entries) =>
+      entries.filter((_, entryIndex) => entryIndex !== index)
+    );
+  };
+
   return (
     <View style={styles.detailsBox}>
       <Text style={styles.detailsTitle}>{horseLogType}</Text>
 
-      {(horseLogType === 'Horse Riding' || horseLogType === 'Riding Test') && (
+      {horseLogType === 'Horse Riding' && (
         <TextInput
           style={styles.input}
           placeholder="Rider name"
@@ -197,13 +225,15 @@ export default function HorseRidingTracker(props: Props) {
         />
       )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Horse name, example: Durkji"
-        placeholderTextColor="#050505"
-        value={props.horseName}
-        onChangeText={props.setHorseName}
-      />
+      {horseLogType !== 'Riding Test' && (
+        <TextInput
+          style={styles.input}
+          placeholder="Horse name, example: Durkji"
+          placeholderTextColor="#050505"
+          value={props.horseName}
+          onChangeText={props.setHorseName}
+        />
+      )}
 
       {horseLogType === 'Horse Riding' && (
         <>
@@ -259,6 +289,15 @@ export default function HorseRidingTracker(props: Props) {
         value={props.horseWalkingMinutes}
         onChangeText={props.setHorseWalkingMinutes}
         keyboardType="number-pad"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Notes"
+        placeholderTextColor="#050505"
+        value={props.horseNotes}
+        onChangeText={props.setHorseNotes}
+        multiline
       />
 
       <View style={styles.performanceBox}>
@@ -328,39 +367,6 @@ export default function HorseRidingTracker(props: Props) {
         </View>
       </View>
 
-      <Text style={styles.detailsSubtitle}>Calendar and Safety</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Ride date, example: 17/07/2026"
-        placeholderTextColor="#050505"
-        value={props.horseRideDate}
-        onChangeText={props.setHorseRideDate}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Calendar note, example: Farrier visit next week"
-        placeholderTextColor="#050505"
-        value={props.horseCalendarNote}
-        onChangeText={props.setHorseCalendarNote}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Safety location, example: Riyadh stable"
-        placeholderTextColor="#050505"
-        value={props.horseSafetyLocation}
-        onChangeText={props.setHorseSafetyLocation}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Safety contact"
-        placeholderTextColor="#050505"
-        value={props.horseSafetyContact}
-        onChangeText={props.setHorseSafetyContact}
-      />
         </>
       )}
 
@@ -383,6 +389,15 @@ export default function HorseRidingTracker(props: Props) {
       {renderYesNoButton('Hoof Oil Used', props.horseHoofOilUsed, () =>
         props.setHorseHoofOilUsed(!props.horseHoofOilUsed)
       )}
+
+      <TextInput
+        style={styles.input}
+        placeholder="Notes"
+        placeholderTextColor="#050505"
+        value={props.horseNotes}
+        onChangeText={props.setHorseNotes}
+        multiline
+      />
         </>
       )}
 
@@ -404,6 +419,15 @@ export default function HorseRidingTracker(props: Props) {
             placeholderTextColor="#050505"
             value={props.horseNextFarrierVisit}
             onChangeText={props.setHorseNextFarrierVisit}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Notes"
+            placeholderTextColor="#050505"
+            value={props.horseNotes}
+            onChangeText={props.setHorseNotes}
+            multiline
           />
 
           <Text style={styles.detailsSubtitle}>Care Supplies</Text>
@@ -449,6 +473,45 @@ export default function HorseRidingTracker(props: Props) {
         value={props.horsePadsCleaningSuppliesBuyingDate}
         onChangeText={props.setHorsePadsCleaningSuppliesBuyingDate}
       />
+
+      {props.horseCustomCleaningSupplies.map((supply, index) => (
+        <View key={`cleaning-supply-${index}`} style={styles.feedEntryBox}>
+          <View style={styles.feedEntryHeader}>
+            <Text style={styles.feedEntryTitle}>Additional supply {index + 1}</Text>
+            <TouchableOpacity
+              style={styles.removeFeedButton}
+              onPress={() => removeCleaningSupply(index)}
+              accessibilityRole="button"
+              accessibilityLabel={`Remove additional supply ${index + 1}`}
+            >
+              <Text style={styles.removeFeedButtonText}>−</Text>
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Supply name"
+            placeholderTextColor="#050505"
+            value={supply.name}
+            onChangeText={(value) => updateCleaningSupply(index, 'name', value)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Buying date"
+            placeholderTextColor="#050505"
+            value={supply.buyingDate}
+            onChangeText={(value) => updateCleaningSupply(index, 'buyingDate', value)}
+          />
+        </View>
+      ))}
+
+      <TouchableOpacity
+        style={styles.addFeedButton}
+        onPress={addCleaningSupply}
+        accessibilityRole="button"
+        accessibilityLabel="Add another cleaning supply"
+      >
+        <Text style={styles.addFeedButtonText}>+ Add cleaning supply</Text>
+      </TouchableOpacity>
 
       <Text style={styles.detailsSubtitle}>Monthly Feed</Text>
 
@@ -497,14 +560,50 @@ export default function HorseRidingTracker(props: Props) {
 
       {horseLogType === 'Riding Test' && (
         <>
-          <Text style={styles.detailsSubtitle}>Dressage Test</Text>
+          <View style={styles.performanceBox}>
+            <Text style={styles.performanceTitle}>Riding Info</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Rider name"
+              placeholderTextColor="#050505"
+              value={props.horseRiderName}
+              onChangeText={props.setHorseRiderName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Horse name"
+              placeholderTextColor="#050505"
+              value={props.horseName}
+              onChangeText={props.setHorseName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Notes"
+              placeholderTextColor="#050505"
+              value={props.horseNotes}
+              onChangeText={props.setHorseNotes}
+              multiline
+            />
+          </View>
 
-      {renderYesNoButton('Dressage Test Day', props.horseDressageTestDay, () =>
-        props.setHorseDressageTestDay(!props.horseDressageTestDay)
-      )}
+          <View style={styles.performanceBox}>
+            <Text style={styles.performanceTitle}>Test</Text>
+            <View style={styles.scoreRow}>
+              <View style={styles.testDayOption}>
+                {renderYesNoButton('Dressage Day', props.horseDressageTestDay, () =>
+                  props.setHorseDressageTestDay(!props.horseDressageTestDay)
+                )}
+              </View>
+              <View style={styles.testDayOption}>
+                {renderYesNoButton('Jumping Day', props.horseJumpingDay, () =>
+                  props.setHorseJumpingDay(!props.horseJumpingDay)
+                )}
+              </View>
+            </View>
 
-      {props.horseDressageTestDay && (
-        <>
+            {props.horseDressageTestDay && (
+              <>
+                <Text style={styles.detailsSubtitle}>Dressage</Text>
           <TextInput
             style={styles.input}
             placeholder="Dressage test name"
@@ -529,17 +628,12 @@ export default function HorseRidingTracker(props: Props) {
             value={props.horseDressageNotes}
             onChangeText={props.setHorseDressageNotes}
           />
-        </>
-      )}
+              </>
+            )}
 
-      <Text style={styles.detailsSubtitle}>Jumping</Text>
-
-      {renderYesNoButton('Jumping Day', props.horseJumpingDay, () =>
-        props.setHorseJumpingDay(!props.horseJumpingDay)
-      )}
-
-      {props.horseJumpingDay && (
-        <>
+            {props.horseJumpingDay && (
+              <>
+                <Text style={styles.detailsSubtitle}>Jumping</Text>
           <TextInput
             style={styles.input}
             placeholder="Fence height, example: 80 cm"
@@ -564,20 +658,12 @@ export default function HorseRidingTracker(props: Props) {
             value={props.horseJumpingNotes}
             onChangeText={props.setHorseJumpingNotes}
           />
-        </>
-      )}
+              </>
+            )}
+          </View>
         </>
       )}
 
-      <Text style={styles.detailsSubtitle}>Notes</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Horse riding notes"
-        placeholderTextColor="#050505"
-        value={props.horseNotes}
-        onChangeText={props.setHorseNotes}
-      />
     </View>
   );
 }
@@ -640,6 +726,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 12,
     color: '#050505',
+  },
+  testDayOption: {
+    flex: 1,
   },
   feedEntryBox: {
     borderTopWidth: 1,

@@ -356,6 +356,7 @@ const state = {
   balootScores: [],
   balootDealerDirection: '↑',
   horseFeedCount: 1,
+  horseCleaningSupplyCount: 0,
   editingSessionId: null,
   editableSessionFields: [],
   settings: { ...defaultUsabilitySettings },
@@ -977,7 +978,7 @@ function customActivityToCloudRow(name, userId, templates, groups) {
     user_id: userId,
     name,
     category: categoryAliases[groups[name]] || groups[name] || 'life',
-    fields: templates[name] || ['Session title', 'Notes'],
+    fields: templates[name] || [],
     updated_at: new Date().toISOString(),
   };
 }
@@ -1042,7 +1043,7 @@ async function restoreCloudCustomActivities(userId) {
   localNames.forEach((name) => {
     mergedActivities.set(name, {
       category: localGroups[name] || 'life',
-      fields: localTemplates[name] || ['Session title', 'Notes'],
+      fields: localTemplates[name] || [],
     });
   });
   (data || []).forEach((activity) => {
@@ -1094,6 +1095,39 @@ function showDueExpirationReminders() {
   window.alert(`${title}\n\n${message}`);
 }
 
+function showDueSessionReminders() {
+  if (
+    !state.userId
+    || !state.settings.notificationsEnabled
+    || !('Notification' in window)
+    || Notification.permission !== 'granted'
+  ) {
+    return;
+  }
+
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const currentTime = now.toTimeString().slice(0, 5);
+  state.sessions.forEach((session) => {
+    const reminder = session.details?.reminder;
+    if (
+      !reminder?.notificationEnabled
+      || reminder.date !== today
+      || (reminder.time && reminder.time > currentTime)
+    ) {
+      return;
+    }
+
+    const alertKey = `tafasili-session-reminder-alert:${state.userId}:${session.id}:${today}`;
+    if (localStorage.getItem(alertKey)) return;
+    localStorage.setItem(alertKey, 'true');
+    new Notification(`${state.language === 'ar' ? 'تذكير' : 'Reminder'}: ${activityLabel(session.activity)}`, {
+      body: reminder.note || activityLabel(session.activity),
+      icon: './assets/tafasili-favicon.png',
+    });
+  });
+}
+
 async function completeCloudSignIn(user) {
   state.userId = user.id;
   state.userEmail = user.email || user.phone || '';
@@ -1123,6 +1157,7 @@ async function completeCloudSignIn(user) {
   showView('home');
   renderHome();
   showDueExpirationReminders();
+  showDueSessionReminders();
   renderHistory();
   if (!state.settings.onboardingComplete) {
     state.onboardingStep = 0;
@@ -1214,7 +1249,9 @@ function getActivities() {
 
 function getCustomTemplateFields(activity) {
   const fields = state.customTemplates[activity];
-  return Array.isArray(fields) && fields.length > 0 ? fields : ['Session title', 'Notes'];
+  return Array.isArray(fields)
+    ? fields.filter((field) => !['session title', 'notes'].includes(String(field).trim().toLowerCase()))
+    : [];
 }
 
 function supportsReminders(activity) {
@@ -1244,13 +1281,16 @@ function getSensitiveEnding(value) {
 
 function reminderFields() {
   const labels = state.language === 'ar'
-    ? { title: 'تذكير', date: 'تاريخ التذكير', time: 'وقت التذكير', note: 'ملاحظة التذكير' }
-    : { title: 'Reminder', date: 'Reminder date', time: 'Reminder time', note: 'Reminder note' };
+    ? { title: 'تذكير', date: 'تاريخ التذكير', time: 'وقت التذكير', note: 'ملاحظة التذكير', notification: 'إرسال إشعار' }
+    : { title: 'Reminder', date: 'Reminder date', time: 'Reminder time', note: 'Reminder note', notification: 'Send notification' };
 
   return fieldSection(labels.title, [
-    inputField(labels.date, 'reminderDate', '2026-08-01', 'date'),
-    inputField(labels.time, 'reminderTime', '18:30', 'time'),
     textAreaField(labels.note, 'reminderNote', 'Reminder details', true),
+    checkboxField(labels.notification, 'reminderNotificationEnabled', 'reminder-notification-fields'),
+    conditionalFields('reminder-notification-fields', [
+      inputField(labels.date, 'reminderDate', '2026-08-01', 'date'),
+      inputField(labels.time, 'reminderTime', '18:30', 'time'),
+    ]),
   ]);
 }
 
@@ -1262,8 +1302,9 @@ function getReminderDetails() {
   const date = sessionForm.querySelector('[name="reminderDate"]')?.value.trim() || '';
   const time = sessionForm.querySelector('[name="reminderTime"]')?.value.trim() || '';
   const note = sessionForm.querySelector('[name="reminderNote"]')?.value.trim() || '';
+  const notificationEnabled = sessionForm.querySelector('[name="reminderNotificationEnabled"]')?.checked || false;
 
-  return date || time || note ? { date, time, note } : undefined;
+  return date || time || note ? { date, time, note, notificationEnabled } : undefined;
 }
 
 function expirationReminderField() {
@@ -1756,6 +1797,7 @@ async function openTracker(activity, restoreDraft = false) {
   state.customActivityUsesTimer = false;
   if (activity === 'Supplies and Feed') {
     state.horseFeedCount = 1;
+    state.horseCleaningSupplyCount = 0;
   }
   state.selectedActivity = activity;
   state.startTime = null;
@@ -1772,6 +1814,7 @@ async function openTracker(activity, restoreDraft = false) {
   activityFields.innerHTML = getFieldsForActivity(activity);
   bindConditionalFields();
   bindHorseFeedEntries();
+  bindHorseCleaningSupplies();
   if (state.customActivities.includes(activity)) {
     bindCustomTimerToggle();
   }
@@ -1896,6 +1939,7 @@ function refreshOpenTrackerLanguage() {
   restoreActivityFieldValues(savedFields);
   bindConditionalFields();
   bindHorseFeedEntries();
+  bindHorseCleaningSupplies();
 
   if (state.customActivities.includes(activity)) {
     bindCustomTimerToggle();
@@ -2186,12 +2230,7 @@ function getFieldsForActivity(activity) {
 
   if (horseActivities.includes(activity)) {
     const commonHorseField = inputField(horseText('horseName'), 'horseName', horseText('horseNamePlaceholder'));
-    const notesAndReminder = `
-      ${fieldSection(horseText('notesSection'), [
-        textAreaField(horseText('horseNotes'), 'horseNotes', horseText('horseNotes'), true),
-      ])}
-      ${reminderFields()}
-    `;
+    const horseNotesField = textAreaField(horseText('notesSection'), 'horseNotes', horseText('horseNotes'), true);
 
     if (activity === 'Horse Riding') {
       return `
@@ -2206,6 +2245,7 @@ function getFieldsForActivity(activity) {
             inputField(horseText('trainingTime'), 'trainingTime', '45 min'),
             checkboxField(horseText('restDay'), 'restDay'),
             inputField(horseText('walkingMinutes'), 'walkingMinutes', '20', 'number'),
+            horseNotesField,
           ])}
           ${fieldSection(horseText('performanceSection'), [
             inputField(horseText('walkMinutes'), 'walkMinutes', '10', 'number'),
@@ -2216,13 +2256,7 @@ function getFieldsForActivity(activity) {
             inputField(horseText('leftTurns'), 'leftTurns', '12', 'number'),
             inputField(horseText('rightTurns'), 'rightTurns', '12', 'number'),
           ])}
-          ${fieldSection(horseText('calendarSafetySection'), [
-            inputField(horseText('rideDate'), 'rideDate', '17/07/2026'),
-            textAreaField(horseText('calendarNote'), 'calendarNote', horseText('calendarNotePlaceholder'), true),
-            inputField(horseText('safetyLocation'), 'safetyLocation', horseText('safetyLocationPlaceholder')),
-            inputField(horseText('safetyContact'), 'safetyContact', horseText('safetyContactPlaceholder')),
-          ])}
-          ${notesAndReminder}
+          ${reminderFields()}
         </div>
       `;
     }
@@ -2236,8 +2270,9 @@ function getFieldsForActivity(activity) {
             checkboxField(horseText('waterChecked'), 'waterChecked'),
             checkboxField(horseText('foodOilGiven'), 'foodOilGiven'),
             checkboxField(horseText('hoofOilUsed'), 'hoofOilUsed'),
+            horseNotesField,
           ])}
-          ${notesAndReminder}
+          ${reminderFields()}
         </div>
       `;
     }
@@ -2251,12 +2286,19 @@ function getFieldsForActivity(activity) {
             inputField(horseText('nextFarrierVisit'), 'nextFarrierVisit', '28/08/2026'),
             inputField(horseText('foodOilBuyingDate'), 'foodOilBuyingDate', '06/07/2026'),
             inputField(horseText('hoofOilBuyingDate'), 'hoofOilBuyingDate', '06/07/2026'),
+            horseNotesField,
           ])}
           ${fieldSection(horseText('cleaningSection'), [
             checkboxField(horseText('shampooUsed'), 'shampooUsed'),
             inputField(horseText('shampooBuyingDate'), 'shampooBuyingDate', '06/07/2026'),
             checkboxField(horseText('padsCleaningSuppliesUsed'), 'padsCleaningSuppliesUsed'),
             inputField(horseText('padsCleaningSuppliesBuyingDate'), 'padsCleaningSuppliesBuyingDate', horseText('padsDatePlaceholder')),
+            `<div class="optional-supply-builder full">
+              <div id="horse-cleaning-supply-list">
+                ${Array.from({ length: state.horseCleaningSupplyCount }, (_, index) => horseCleaningSupplyEntryFields(index)).join('')}
+              </div>
+              <button class="button secondary add-feed-button" id="horse-add-cleaning-supply" type="button">+ ${horseText('addCleaningSupply')}</button>
+            </div>`,
           ])}
           <div class="field-section">
             <h2>${horseText('monthlyFeedSection')}</h2>
@@ -2265,32 +2307,33 @@ function getFieldsForActivity(activity) {
             </div>
             <button class="button secondary add-feed-button" id="horse-add-feed" type="button">+ ${horseText('addFeed')}</button>
           </div>
-          ${notesAndReminder}
+          ${reminderFields()}
         </div>
       `;
     }
 
     return `
       <div class="horse-form">
-        ${fieldSection(horseText('dressageSection'), [
+        ${fieldSection(horseText('ridingInfoSection'), [
           inputField(horseText('riderName'), 'riderName', horseText('riderNamePlaceholder')),
           commonHorseField,
+          horseNotesField,
+        ])}
+        ${fieldSection(horseText('testSection'), [
           checkboxField(horseText('dressageTestDay'), 'dressageTestDay', 'dressage-fields'),
+          checkboxField(horseText('jumpingDay'), 'jumpingDay', 'jumping-fields'),
           conditionalFields('dressage-fields', [
             inputField(horseText('dressageTestName'), 'dressageTestName', horseText('dressageTestName')),
             inputField(horseText('dressageScore'), 'dressageScore', '68.5', 'number'),
             textAreaField(horseText('dressageNotes'), 'dressageNotes', horseText('dressageNotes'), true),
           ]),
-        ])}
-        ${fieldSection(horseText('jumpingSection'), [
-          checkboxField(horseText('jumpingDay'), 'jumpingDay', 'jumping-fields'),
           conditionalFields('jumping-fields', [
             inputField(horseText('fenceHeight'), 'fenceHeight', '80 cm'),
             inputField(horseText('fenceCount'), 'fenceCount', '8', 'number'),
             textAreaField(horseText('jumpingNotes'), 'jumpingNotes', horseText('jumpingNotes'), true),
           ]),
         ])}
-        ${notesAndReminder}
+        ${reminderFields()}
       </div>
     `;
   }
@@ -2586,7 +2629,24 @@ function bindConditionalFields() {
       target.classList.toggle('hidden', !control.checked);
     };
 
-    control.addEventListener('change', updateVisibility);
+    control.addEventListener('change', async () => {
+      if (
+        control.name === 'reminderNotificationEnabled'
+        && control.checked
+        && 'Notification' in window
+      ) {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          control.checked = false;
+          sessionMessage.textContent = state.language === 'ar'
+            ? 'الإشعارات غير مسموحة في إعدادات المتصفح.'
+            : 'Notifications are blocked in your browser settings.';
+        } else if (!state.settings.notificationsEnabled) {
+          await saveUsabilitySettings({ ...state.settings, notificationsEnabled: true });
+        }
+      }
+      updateVisibility();
+    });
     updateVisibility();
   });
 }
@@ -2628,6 +2688,52 @@ function bindHorseFeedEntries() {
     restoreActivityFieldValues(savedFields);
     bindConditionalFields();
     bindHorseFeedEntries();
+    bindHorseCleaningSupplies();
+  });
+}
+
+function bindHorseCleaningSupplies() {
+  const addButton = document.querySelector('#horse-add-cleaning-supply');
+  if (!addButton) return;
+
+  addButton.addEventListener('click', () => {
+    const savedFields = captureActivityFieldValues();
+    state.horseCleaningSupplyCount += 1;
+    activityFields.innerHTML = getFieldsForActivity('Supplies and Feed');
+    restoreActivityFieldValues(savedFields);
+    bindConditionalFields();
+    bindHorseFeedEntries();
+    bindHorseCleaningSupplies();
+  });
+
+  activityFields.querySelectorAll('[data-remove-cleaning-supply]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const removedIndex = Number(button.dataset.removeCleaningSupply);
+      const savedValues = Array.from(
+        activityFields.querySelectorAll('[data-horse-cleaning-supply-entry]')
+      )
+        .filter((_, index) => index !== removedIndex)
+        .map((entry, index) => ({
+          name: entry.querySelector(`[name^="cleaningSupplyName"]`)?.value || '',
+          buyingDate: entry.querySelector(`[name^="cleaningSupplyBuyingDate"]`)?.value || '',
+          index,
+        }));
+      const savedFields = captureActivityFieldValues().filter(
+        (field) => !/^cleaningSupply(?:Name|BuyingDate)\d+$/.test(field.name)
+      );
+      state.horseCleaningSupplyCount = savedValues.length;
+      activityFields.innerHTML = getFieldsForActivity('Supplies and Feed');
+      restoreActivityFieldValues(savedFields);
+      savedValues.forEach((entry) => {
+        const nameInput = activityFields.querySelector(`[name="cleaningSupplyName${entry.index}"]`);
+        const dateInput = activityFields.querySelector(`[name="cleaningSupplyBuyingDate${entry.index}"]`);
+        if (nameInput) nameInput.value = entry.name;
+        if (dateInput) dateInput.value = entry.buyingDate;
+      });
+      bindConditionalFields();
+      bindHorseFeedEntries();
+      bindHorseCleaningSupplies();
+    });
   });
 }
 
@@ -3308,6 +3414,19 @@ function horseFeedEntryFields(index) {
   `;
 }
 
+function horseCleaningSupplyEntryFields(index) {
+  return `
+    <div class="horse-feed-entry" data-horse-cleaning-supply-entry>
+      <div class="horse-entry-heading">
+        <strong>${horseText('additionalSupply')} ${index + 1}</strong>
+        <button class="icon-button" type="button" data-remove-cleaning-supply="${index}" aria-label="${horseText('removeSupply')}">−</button>
+      </div>
+      ${inputField(horseText('supplyName'), `cleaningSupplyName${index}`, horseText('supplyName'))}
+      ${inputField(horseText('feedBuyingDate'), `cleaningSupplyBuyingDate${index}`, '06/07/2026')}
+    </div>
+  `;
+}
+
 function horseText(key) {
   const labels = {
     en: {
@@ -3359,6 +3478,11 @@ function horseText(key) {
       hoofOilUsed: 'Hoof Oil Used',
       hoofOilBuyingDate: 'Hoof oil buying date',
       cleaningSection: 'Cleaning Supplies',
+      additionalCleaningSupplies: 'Optional Cleaning Supplies',
+      addCleaningSupply: 'Add cleaning supply',
+      additionalSupply: 'Additional supply',
+      removeSupply: 'Remove supply',
+      supplyName: 'Supply name',
       shampooUsed: 'Shampoo Used',
       shampooBuyingDate: 'Shampoo buying date',
       padsCleaningSuppliesUsed: 'Pads Cleaning Supplies Used',
@@ -3369,6 +3493,8 @@ function horseText(key) {
       feedBuyingDate: 'Buying date',
       addFeed: 'Add another feed',
       dressageSection: 'Dressage Test',
+      ridingInfoSection: 'Riding Info',
+      testSection: 'Test',
       dressageTestDay: 'Dressage Test Day',
       dressageTestName: 'Dressage test name',
       dressageScore: 'Dressage score %',
@@ -3430,6 +3556,11 @@ function horseText(key) {
       hoofOilUsed: 'تم استخدام زيت الحافر',
       hoofOilBuyingDate: 'تاريخ شراء زيت الحافر',
       cleaningSection: 'مستلزمات التنظيف',
+      additionalCleaningSupplies: 'مستلزمات تنظيف اختيارية',
+      addCleaningSupply: 'إضافة مستلزم تنظيف',
+      additionalSupply: 'مستلزم إضافي',
+      removeSupply: 'حذف المستلزم',
+      supplyName: 'اسم المستلزم',
       shampooUsed: 'تم استخدام الشامبو',
       shampooBuyingDate: 'تاريخ شراء الشامبو',
       padsCleaningSuppliesUsed: 'تم استخدام الباد ومستلزمات التنظيف',
@@ -3440,6 +3571,8 @@ function horseText(key) {
       feedBuyingDate: 'تاريخ الشراء',
       addFeed: 'إضافة علف آخر',
       dressageSection: 'اختبار الدريساج',
+      ridingInfoSection: 'معلومات الركوب',
+      testSection: 'الاختبار',
       dressageTestDay: 'يوم اختبار دريساج',
       dressageTestName: 'اسم اختبار الدريساج',
       dressageScore: 'درجة الدريساج %',
@@ -3701,8 +3834,17 @@ function getSessionDetails() {
       }))
       .filter((feed) => feed.amount || feed.buyingDate);
 
+    details.customCleaningSupplies = Array.from(
+      sessionForm.querySelectorAll('[data-horse-cleaning-supply-entry]')
+    )
+      .map((entry, index) => ({
+        name: entry.querySelector(`[name="cleaningSupplyName${index}"]`)?.value.trim() || '',
+        buyingDate: entry.querySelector(`[name="cleaningSupplyBuyingDate${index}"]`)?.value.trim() || '',
+      }))
+      .filter((supply) => supply.name || supply.buyingDate);
+
     Object.keys(details).forEach((key) => {
-      if (/^feed(?:Amount|BuyingDate)\d+$/.test(key)) {
+      if (/^(?:feed(?:Amount|BuyingDate)|cleaningSupply(?:Name|BuyingDate))\d+$/.test(key)) {
         delete details[key];
       }
     });
@@ -4616,7 +4758,7 @@ customActivityForm.addEventListener('submit', async (event) => {
   state.customActivities = [...state.customActivities, customActivity];
   state.customTemplates = {
     ...state.customTemplates,
-    [customActivity]: customFields.length > 0 ? customFields : ['Session title', 'Notes'],
+    [customActivity]: customFields,
   };
   state.customGroups = {
     ...state.customGroups,

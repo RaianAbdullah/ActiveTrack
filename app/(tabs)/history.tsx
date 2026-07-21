@@ -812,6 +812,17 @@ export default function HistoryScreen() {
             Hoof Oil Bought: {horse.hoofOilBuyingDate || 'Not filled'}
           </Text>
 
+          {horse.customCleaningSupplies?.map((supply, index) => (
+            <View key={`history-cleaning-supply-${index}`}>
+              <Text style={styles.detailsText}>
+                Additional Supply {index + 1}: {supply.name || 'Not filled'}
+              </Text>
+              <Text style={styles.detailsText}>
+                Bought: {supply.buyingDate || 'Not filled'}
+              </Text>
+            </View>
+          ))}
+
           <Text style={styles.detailsSectionTitle}>Feed</Text>
 
           {horse.feedEntries?.length ? (
