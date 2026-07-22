@@ -2989,17 +2989,16 @@ const getGroupedActivities = () => {
     <GestureHandlerRootView style={styles.root}>
       <ScrollView contentContainerStyle={styles.loginContainer}>
         <View style={styles.authTopbar}>
+          <View style={styles.topbarSpacer} />
           {renderBrand()}
-          <View style={styles.headerControlRow}>
-            <TouchableOpacity
-              style={styles.languageButton}
-              onPress={toggleLanguage}
-              accessibilityRole="button"
-              accessibilityLabel={isArabic ? 'التبديل إلى الإنجليزية' : 'Switch to Arabic'}
-            >
-              <Text style={styles.languageButtonText}>{isArabic ? 'EN' : 'AR'}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.languageButton}
+            onPress={toggleLanguage}
+            accessibilityRole="button"
+            accessibilityLabel={isArabic ? 'التبديل إلى الإنجليزية' : 'Switch to Arabic'}
+          >
+            <Text style={styles.languageButtonText}>{isArabic ? 'EN' : 'AR'}</Text>
+          </TouchableOpacity>
         </View>
         <Text style={[styles.loginTagline, isArabic && styles.rtlText]}>
           {isArabic ? 'كل تفاصيلك في مكان واحد' : 'Your life, Organized.'}
@@ -3176,29 +3175,14 @@ const getGroupedActivities = () => {
     return (
       <GestureHandlerRootView style={styles.root}>
         <ScrollView style={styles.container}>
-          <View style={styles.activityTopbar}>
-            {renderBrand()}
-            <View style={styles.headerControlRow}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={goBackToList}
-                accessibilityRole="button"
-                accessibilityLabel={isArabic ? 'رجوع' : 'Back'}
-              >
-                <Ionicons name={isArabic ? 'arrow-forward' : 'arrow-back'} size={27} color="#050505" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
-                <Text style={styles.languageButtonText}>{isArabic ? 'EN' : 'AR'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.logoutButtonTop}
-                onPress={logout}
-                accessibilityLabel={isArabic ? 'تسجيل الخروج' : 'Log out'}
-              >
-                <Ionicons name="power-outline" size={26} color="#050505" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={goBackToList}
+            accessibilityRole="button"
+            accessibilityLabel={isArabic ? 'رجوع' : 'Back'}
+          >
+            <Ionicons name={isArabic ? 'arrow-forward' : 'arrow-back'} size={27} color="#050505" />
+          </TouchableOpacity>
 
           <Text style={[styles.title, isArabic && styles.rtlText]}>
             {activityDisplayName(selectedActivity)}
@@ -3990,17 +3974,17 @@ const getGroupedActivities = () => {
       <View style={styles.mainContainer}>
         <ScrollView style={styles.container}>
           <View style={styles.homeTopbar}>
+            <TouchableOpacity
+              style={styles.logoutButtonTop}
+              onPress={logout}
+              accessibilityLabel={isArabic ? 'تسجيل الخروج' : 'Log out'}
+            >
+              <Ionicons name="power-outline" size={26} color="#050505" />
+            </TouchableOpacity>
             {renderBrand()}
-            <View style={styles.headerControlRow}>
+            <View style={styles.homeTopActions}>
               <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
                 <Text style={styles.languageButtonText}>{isArabic ? 'EN' : 'AR'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.logoutButtonTop}
-                onPress={logout}
-                accessibilityLabel={isArabic ? 'تسجيل الخروج' : 'Log out'}
-              >
-                <Ionicons name="power-outline" size={26} color="#050505" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.languageButton} onPress={() => setShowSettingsModal(true)} accessibilityLabel="Settings">
                 <Ionicons name="settings-outline" size={23} color="#050505" />
@@ -4445,6 +4429,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F7F9',
   },
   backButton: {
+    marginTop: 55,
+    marginBottom: 20,
+    alignSelf: 'flex-start',
     minHeight: 44,
     width: 44,
     paddingHorizontal: 0,
@@ -4457,7 +4444,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#050505',
-    marginTop: 8,
+    marginTop: 60,
     marginBottom: 8,
   },
   subtitle: {
@@ -4468,14 +4455,10 @@ const styles = StyleSheet.create({
   homeTopbar: {
     marginTop: 42,
     marginBottom: 30,
-    minHeight: 216,
-    alignItems: 'flex-start',
-  },
-  activityTopbar: {
-    marginTop: 42,
-    marginBottom: 18,
-    minHeight: 216,
-    alignItems: 'flex-start',
+    minHeight: 98,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   homeHeading: {
     color: '#050505',
@@ -4487,8 +4470,10 @@ const styles = StyleSheet.create({
   authTopbar: {
     width: '100%',
     marginBottom: 34,
-    minHeight: 216,
-    alignItems: 'flex-start',
+    minHeight: 98,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   brandLockup: {
     flexDirection: 'column',
@@ -4512,10 +4497,8 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: 'transparent',
   },
-  headerControlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+  topbarSpacer: {
+    width: 44,
   },
   languageButtonText: {
     color: '#050505',
@@ -5444,6 +5427,11 @@ lockButtonText: {
   color: '#050505',
   fontSize: 16,
   fontWeight: '900',
+},
+homeTopActions: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 4,
 },
 logoutButtonTop: {
   width: 44,

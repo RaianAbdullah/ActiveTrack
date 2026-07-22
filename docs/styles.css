@@ -132,10 +132,9 @@ a {
 .topbar {
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  min-height: 224px;
+  align-items: center;
+  gap: 8px;
+  min-height: 190px;
   padding: 14px 0;
   background: transparent;
 }
@@ -146,7 +145,7 @@ a {
   gap: 8px;
 }
 
-.top-actions > #back-button,
+.topbar > #back-button,
 .top-actions > #language-button,
 .top-actions > #logout-button {
   width: 42px;
@@ -166,10 +165,10 @@ a {
   font-weight: 400;
 }
 
-.top-actions > #back-button:hover,
+.topbar > #back-button:hover,
 .top-actions > #language-button:hover,
 .top-actions > #logout-button:hover,
-.top-actions > #back-button:focus-visible,
+.topbar > #back-button:focus-visible,
 .top-actions > #language-button:focus-visible,
 .top-actions > #logout-button:focus-visible {
   background: rgba(255, 255, 255, 0.38);
@@ -177,17 +176,18 @@ a {
   outline-offset: 2px;
 }
 
-#back-button.hidden,
 #logout-button.hidden {
   display: none;
 }
 
 .brand {
-  position: static;
+  position: absolute;
+  top: 10px;
+  left: 50%;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  transform: none;
+  transform: translateX(-50%);
 }
 
 .brand-mark {
@@ -1749,6 +1749,10 @@ body.rtl .category-card {
 
   .shell {
     width: min(100% - 24px, 1180px);
+  }
+
+  .topbar {
+    grid-template-columns: 64px 1fr auto;
   }
 
   h1 {
